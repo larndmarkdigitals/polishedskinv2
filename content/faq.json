@@ -1,0 +1,28 @@
+{
+  "faq": [
+    {
+      "q": "I'm not sure which treatment I need. How do I choose?",
+      "a": "You don't have to figure it out alone — that's our job. Every visit starts by getting to know your skin, your history, and your goals, then we recommend the right treatment (or plan) for you. The easiest place to start is a facial; we'll build a plan from there."
+    },
+    {
+      "q": "What's your overall approach to skincare?",
+      "a": "We're here to <strong>rebuild your skin, not break it down</strong>. Our treatments work <em>with</em> your skin's natural biology — stimulating its own repair and collagen-building processes rather than stripping or overworking it. Healthy skin first, results that last."
+    },
+    {
+      "q": "Is there any downtime?",
+      "a": "It depends on the treatment. Facials and the Glo2Facial have no downtime at all. BioRePeel has little to none. ProCell Microchanneling may leave you lightly flushed for about a day. We'll always tell you exactly what to expect beforehand."
+    },
+    {
+      "q": "How many sessions will I need?",
+      "a": "Some treatments give instant results (like the Glo2Facial), while corrective treatments work best as a series — typically 3–6 sessions for ProCell Microchanneling or BioRePeel. We'll map out a realistic plan based on your goals at your first visit."
+    },
+    {
+      "q": "How do I book, and do you take walk-ins?",
+      "a": "Booking is quick and online — just hit any <strong>Book Now</strong> button. We're appointment-based (Tuesday–Saturday), with walk-ins by availability. New clients are always welcome."
+    },
+    {
+      "q": "How should I prep for my appointment?",
+      "a": "Come with clean skin and no makeup if you can. For advanced treatments, avoid retinol and strong exfoliating acids for a few days beforehand, and skip sun exposure before and after. We'll send any specific guidance when you book."
+    }
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "reviews": [
+    {
+      "name": "Sarah M.",
+      "service": "Signature Glo2Facial",
+      "text": "I've been to a lot of estheticians and no one compares. So thoughtful, skilled, and genuinely invested in your skin. I leave every appointment glowing — and so relaxed.",
+      "featured": true
+    },
+    {
+      "name": "Jessica R.",
+      "service": "Deluxe Facial",
+      "text": "Best skincare experience I've had, hands down. They actually listen and tailor everything to your skin. Glowing for days after."
+    },
+    {
+      "name": "Megan T.",
+      "service": "ProCell Microchanneling",
+      "text": "The microchanneling results are unreal. My texture and fine lines have visibly improved after just a couple sessions. Worth every penny."
+    },
+    {
+      "name": "Ashley P.",
+      "service": "Glo2Facial",
+      "text": "Clean, calming space and you can tell they truly know skin. I've already booked my next three appointments. Highly recommend."
+    },
+    {
+      "name": "Kayla B.",
+      "service": "Dermaplaning Facial",
+      "text": "My dermaplaning facial left my skin so smooth my makeup went on flawlessly for a week. This is my new go-to in Eugene."
+    },
+    {
+      "name": "Nicole D.",
+      "service": "Glowing Facial",
+      "text": "I came in with breakouts and so much frustration. They built a real plan for me and my skin has completely turned around."
+    },
+    {
+      "name": "Rachel S.",
+      "service": "Deluxe Facial",
+      "text": "Professional, knowledgeable, and so warm. Everything is explained as it happens and why. I always leave feeling cared for."
+    },
+    {
+      "name": "Emily H.",
+      "service": "Signature Glo2Facial",
+      "text": "The Glo2Facial is magic. Instant glow with zero downtime — I booked it before a wedding and got compliments all night."
+    },
+    {
+      "name": "Taylor W.",
+      "service": "Glowing Facial",
+      "text": "Hands down the best facial in Eugene. The space is gorgeous, it's relaxing, and the results actually last. Can't recommend enough."
+    },
+    {
+      "name": "Brianna L.",
+      "service": "Microneedling",
+      "text": "Microneedling here was a game changer for my acne scarring. Gentle, professional, and the results speak for themselves."
+    }
+  ]
+}

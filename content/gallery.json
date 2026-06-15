@@ -1,0 +1,58 @@
+{
+  "beforeAfter": [
+    {
+      "treatment": "ProCell Microchanneling",
+      "before": "",
+      "after": ""
+    },
+    {
+      "treatment": "BioRePeel",
+      "before": "",
+      "after": ""
+    },
+    {
+      "treatment": "Signature Glo2Facial",
+      "before": "",
+      "after": ""
+    },
+    {
+      "treatment": "Microneedling",
+      "before": "",
+      "after": ""
+    }
+  ],
+  "gallery": [
+    {
+      "treatment": "Glo2Facial",
+      "img": ""
+    },
+    {
+      "treatment": "Dermaplaning Facial",
+      "img": ""
+    },
+    {
+      "treatment": "ProCell Microchanneling",
+      "img": ""
+    },
+    {
+      "treatment": "BioRePeel",
+      "img": ""
+    },
+    {
+      "treatment": "Deluxe Facial",
+      "img": ""
+    },
+    {
+      "treatment": "Glowing Facial",
+      "img": ""
+    },
+    {
+      "treatment": "Microneedling",
+      "img": ""
+    },
+    {
+      "treatment": "The clinic",
+      "img": ""
+    }
+  ]
+}

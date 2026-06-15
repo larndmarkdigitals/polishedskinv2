@@ -1,0 +1,56 @@
+{
+  "packages": [
+    {
+      "name": "The Glow Reset",
+      "tagline": "Camera-ready radiance for your big moment.",
+      "forWho": "Events, weddings, or a monthly refresh",
+      "includes": [
+        "Signature Glo2Facial",
+        "Custom serum infusion",
+        "Optional dermaplaning add-on"
+      ],
+      "desc": "Our go-to for instant, no-downtime glow. Perfect on its own before an event, or booked monthly to keep skin bright, hydrated, and healthy year-round.",
+      "note": "Single session or monthly",
+      "popular": false
+    },
+    {
+      "name": "The Skin Rebuild",
+      "tagline": "Rebuild your skin — don't break it down.",
+      "forWho": "Fine lines, texture, acne scarring, firmness",
+      "includes": [
+        "ProCell Microchanneling × 3",
+        "Growth-factor serums",
+        "Glo2Facial between sessions"
+      ],
+      "desc": "Our signature corrective series. A course of ProCell Microchanneling rebuilds collagen and elastin from within, with a Glo2Facial in between to keep skin nourished and glowing while it renews.",
+      "note": "Series of 3 · spaced 4 weeks apart",
+      "popular": true
+    },
+    {
+      "name": "Clarity & Renewal",
+      "tagline": "Clearer, smoother, more even skin.",
+      "forWho": "Breakouts, congestion, dullness, pigmentation",
+      "includes": [
+        "BioRePeel × 4",
+        "Custom home-care guidance",
+        "Maintenance facial"
+      ],
+      "desc": "A bio-stimulating peel series that resurfaces and rebuilds with little to no downtime — ideal for clearing congestion, smoothing texture, and evening out tone over time.",
+      "note": "Series of 4–6 · spaced 2–3 weeks apart",
+      "popular": false
+    },
+    {
+      "name": "Age Management Membership",
+      "tagline": "Consistency is the secret to great skin.",
+      "forWho": "Anyone committed to long-term skin health",
+      "includes": [
+        "One treatment per month",
+        "Priority booking",
+        "Member pricing on add-ons"
+      ],
+      "desc": "Skin renews on a cycle, and the best results come from showing up for it. A monthly treatment — tailored each visit to what your skin needs — keeps you ahead of aging, congestion, and dullness.",
+      "note": "Monthly · cancel anytime",
+      "popular": false
+    }
+  ]
+}

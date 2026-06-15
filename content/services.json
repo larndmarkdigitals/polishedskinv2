@@ -1,0 +1,340 @@
+{
+  "categories": [
+    {
+      "name": "Signature Facials",
+      "sub": "Relaxing, results-driven facials personalized to your skin."
+    },
+    {
+      "name": "Advanced Treatments",
+      "sub": "Higher-intensity treatments that rebuild and renew — not break the skin down."
+    },
+    {
+      "name": "Microchanneling",
+      "sub": "Collagen-rebuilding microchanneling with growth factors — our corrective specialty."
+    },
+    {
+      "name": "Peels & Resurfacing",
+      "sub": "Resurfacing treatments that brighten and renew with little to no downtime."
+    },
+    {
+      "name": "Waxing",
+      "sub": "Quick, professional waxing services."
+    }
+  ],
+  "services": [
+    {
+      "name": "New Client Consultation & Facial",
+      "category": "Signature Facials",
+      "duration": "90 min",
+      "price": "$119",
+      "blurb": "Your first visit: a full skin consultation plus a customized facial to map out your plan.",
+      "desc": "Your first visit — a full skin consultation paired with a customized facial so we can find the right treatment plan for you.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Polished Skin Signature Facial",
+      "category": "Signature Facials",
+      "duration": "50 min",
+      "price": "$79",
+      "blurb": "A personalized cleanse, exfoliation, and mask to refresh and balance your skin.",
+      "desc": "A personalized cleanse, exfoliation, and nourishing mask to refresh and balance your skin.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Deluxe Renewal Facial",
+      "category": "Signature Facials",
+      "duration": "60 min",
+      "price": "$99",
+      "blurb": "An elevated facial with added treatment steps for a deeper renewal.",
+      "desc": "An elevated facial with added treatment steps for a deeper, more restorative renewal.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Glowing Renewal Facial",
+      "category": "Signature Facials",
+      "duration": "75 min",
+      "price": "$129",
+      "blurb": "A brightening, hydrating facial that restores radiance and even tone.",
+      "desc": "A brightening, hydrating facial designed to restore radiance and even out tone for a lit-from-within glow.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Dermaplane Glow Facial",
+      "category": "Signature Facials",
+      "duration": "60 min",
+      "price": "$129",
+      "blurb": "Gentle dermaplaning removes dead skin and fine hair for baby-soft, glowing skin.",
+      "desc": "Gentle dermaplaning removes dead skin and fine vellus hair, leaving skin baby-soft and makeup-flawless.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Gentleman's Facial",
+      "category": "Signature Facials",
+      "duration": "60 min",
+      "price": "$89",
+      "blurb": "A tailored facial for men's skin — deep cleanse, exfoliate, and soothe.",
+      "desc": "A facial tailored to men's skin: deep cleanse, exfoliation, and soothing care for a healthy, comfortable complexion.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Nano Infusion Facial",
+      "category": "Signature Facials",
+      "duration": "75 min",
+      "price": "$159",
+      "blurb": "Nano-infusion drives targeted serums deep into the skin — visible results, no needles.",
+      "desc": "Nano-infusion technology drives targeted serums deep into the skin for visible results, with no needles and no downtime.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Polished Skin Glo2Facial",
+      "category": "Advanced Treatments",
+      "duration": "60+ min",
+      "price": "$179+",
+      "blurb": "<strong>Oxygenate • Exfoliate • Rejuvenate</strong><br>Our signature oxygenating facial improves hydration, circulation, and skin vitality while leaving skin brighter, smoother, and instantly refreshed. Ideal for dullness, dehydration, sensitivity, and healthy aging.",
+      "desc": "Our most-loved treatment — a 3-in-1 oxygenating facial that exfoliates, triggers your skin's own oxygen surge, and infuses nourishing serums.",
+      "featured": true,
+      "link": "treatment.html?slug=glo2facial",
+      "img": ""
+    },
+    {
+      "name": "Polished Skin Deluxe Glo2Facial",
+      "category": "Advanced Treatments",
+      "duration": "75+ min",
+      "price": "$199+",
+      "blurb": "The Glo2Facial with added advanced steps for an even deeper treatment.",
+      "desc": "The signature Glo2Facial enhanced with added advanced steps for an even deeper, more transformative result.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Jet Plasma®",
+      "category": "Advanced Treatments",
+      "duration": "60+ min",
+      "price": "$249+",
+      "blurb": "Non-invasive plasma energy that lifts, tightens, and revitalizes — supporting collagen with no downtime.",
+      "desc": "A non-invasive treatment that supports collagen production, improves skin firmness, reduces inflammation, and enhances overall skin health — with no downtime.",
+      "featured": true,
+      "link": "treatment.html?slug=jet-plasma",
+      "img": ""
+    },
+    {
+      "name": "Regenerative Treatment",
+      "category": "Advanced Treatments",
+      "duration": "120 min",
+      "price": "$299",
+      "blurb": "A comprehensive session combining advanced modalities to rebuild the skin.",
+      "desc": "A comprehensive, full-length session combining advanced modalities to deeply rebuild and regenerate the skin.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "ProCell Microchanneling",
+      "category": "Microchanneling",
+      "duration": "60+ min",
+      "price": "$299+",
+      "blurb": "<strong>Stimulate Collagen • Improve Texture</strong><br>Advanced microchanneling with growth factors and peptides helps soften fine lines, improve skin texture, minimize acne scarring, and support firmer, healthier-looking skin.",
+      "desc": "Microchanneling paired with bioengineered stem-cell growth-factor serums to rebuild collagen and renew skin from within.",
+      "featured": true,
+      "link": "treatment.html?slug=procell-microchanneling",
+      "img": ""
+    },
+    {
+      "name": "Microchanneling & NexGen+ PDRN",
+      "category": "Microchanneling",
+      "duration": "75+ min",
+      "price": "$279+",
+      "blurb": "Microchanneling enhanced with NexGen+ PDRN to accelerate repair and renewal.",
+      "desc": "Microchanneling enhanced with NexGen+ PDRN salmon-derived regenerative serum to accelerate healing, hydration, and renewal.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Advanced Microchanneling & PDRN",
+      "category": "Microchanneling",
+      "duration": "90+ min",
+      "price": "$349+",
+      "blurb": "Our most advanced microchanneling protocol with PDRN for maximum regeneration.",
+      "desc": "Our most advanced microchanneling protocol, combining deeper treatment with PDRN for maximum regeneration and results.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "BioRePeel",
+      "category": "Peels & Resurfacing",
+      "duration": "45+ min",
+      "price": "$129+",
+      "blurb": "<strong>Renew • Brighten • Restore</strong><br>A professional Italian chemical peel that stimulates cellular renewal while improving pigmentation, texture, acne, and signs of aging — with minimal downtime and maximum glow.",
+      "desc": "A two-phase Italian TCA peel that exfoliates while it bio-stimulates collagen — brighter, smoother, more even skin with little to no downtime.",
+      "featured": true,
+      "link": "treatment.html?slug=biorepeel",
+      "img": ""
+    },
+    {
+      "name": "BioRePeel Deluxe",
+      "category": "Peels & Resurfacing",
+      "duration": "60+ min",
+      "price": "$179+",
+      "blurb": "The BioRePeel with added treatment steps for an enhanced result.",
+      "desc": "The BioRePeel enhanced with added treatment steps for a deeper resurfacing and an even brighter finish.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Oxygen Peel",
+      "category": "Peels & Resurfacing",
+      "duration": "45 min",
+      "price": "$79",
+      "blurb": "A gentle oxygenating peel that decongests and refreshes — no downtime.",
+      "desc": "A gentle oxygenating peel that decongests, brightens, and refreshes the skin with zero downtime.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Brighten & Balance Peel",
+      "category": "Peels & Resurfacing",
+      "duration": "60 min",
+      "price": "$99",
+      "blurb": "A customized peel to brighten tone and balance texture.",
+      "desc": "A customized peel that brightens tone, smooths texture, and balances the skin for a clear, even complexion.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Eyebrow Wax",
+      "category": "Waxing",
+      "duration": "20 min",
+      "price": "$25",
+      "blurb": "",
+      "desc": "Clean, precise eyebrow shaping.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Eyebrow Wax & Tint",
+      "category": "Waxing",
+      "duration": "30 min",
+      "price": "$30",
+      "blurb": "",
+      "desc": "Brow shaping plus a tint to define and fill.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Eyebrow Tint",
+      "category": "Waxing",
+      "duration": "20 min",
+      "price": "$20",
+      "blurb": "",
+      "desc": "Tint to define and add depth to your brows.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Lip or Chin Wax",
+      "category": "Waxing",
+      "duration": "20 min",
+      "price": "$15",
+      "blurb": "",
+      "desc": "Quick lip or chin hair removal.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Underarm Wax",
+      "category": "Waxing",
+      "duration": "15 min",
+      "price": "$25",
+      "blurb": "",
+      "desc": "Smooth, fast underarm waxing.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Half Arm Wax",
+      "category": "Waxing",
+      "duration": "20 min",
+      "price": "$40+",
+      "blurb": "",
+      "desc": "Waxing for the lower or upper arms.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Full Arm Wax",
+      "category": "Waxing",
+      "duration": "30 min",
+      "price": "$55",
+      "blurb": "",
+      "desc": "Full-arm waxing, shoulder to wrist.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Just the Strip Wax",
+      "category": "Waxing",
+      "duration": "10 min",
+      "price": "$15",
+      "blurb": "",
+      "desc": "A quick single-strip touch-up.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Chest Wax",
+      "category": "Waxing",
+      "duration": "45 min",
+      "price": "$60",
+      "blurb": "",
+      "desc": "Full chest waxing.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Back Wax",
+      "category": "Waxing",
+      "duration": "45 min",
+      "price": "$70",
+      "blurb": "",
+      "desc": "Full back waxing.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Bikini Wax",
+      "category": "Waxing",
+      "duration": "25 min",
+      "price": "$50",
+      "blurb": "",
+      "desc": "Bikini-line waxing.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Brazilian Wax",
+      "category": "Waxing",
+      "duration": "40 min",
+      "price": "$75",
+      "blurb": "",
+      "desc": "Full Brazilian waxing.",
+      "featured": false,
+      "img": ""
+    },
+    {
+      "name": "Brazilian with Pretty Kitty",
+      "category": "Waxing",
+      "duration": "60 min",
+      "price": "$95",
+      "blurb": "",
+      "desc": "Brazilian wax with a Pretty Kitty finishing treatment.",
+      "featured": false,
+      "img": ""
+    }
+  ]
+}

@@ -1,0 +1,216 @@
+# ============================================================
+# Sveltia CMS configuration for Polished Skin.
+# (Sveltia is Decap/Netlify-CMS compatible, so this config format is standard.)
+#
+# CHECK IT OUT NOW (local mode, no login, no GitHub needed):
+#   1. Serve this folder over http://localhost (e.g. python3 -m http.server 8000).
+#   2. Open http://localhost:8000/admin/ in a CHROMIUM browser
+#      (Chrome, Edge, Brave, or Arc — not Safari/Firefox for local mode).
+#   3. Click "Work with Local Repository" and choose the `polishedskinv2` folder.
+#   4. Edit away — Save writes straight to the content/*.json files.
+#
+# GO LIVE FOR THE CLIENT (later):
+#   - Put the repo on GitHub and host on Netlify.
+#   - Replace OWNER/REPO below with the real repo, then the client logs in with
+#     GitHub to publish; saving commits + redeploys automatically.
+# ============================================================
+
+backend:
+  name: github
+  repo: OWNER/REPO        # TODO: set to the real GitHub repo before going live
+  branch: main
+
+# Lets you edit local files in the browser without GitHub (see notes above).
+local_backend: true
+
+# Where photo uploads are saved and how they're referenced in the content.
+media_folder: "img"
+public_folder: "/img"
+
+collections:
+  - name: content
+    label: "Website Content"
+    editor:
+      preview: false
+    files:
+      # ---- Services & Prices -------------------------------------------------
+      - name: services
+        label: "Services & Prices"
+        file: "content/services.json"
+        description: "The treatment menu, prices, and the featured cards on the home page."
+        fields:
+          - name: categories
+            label: "Service categories"
+            label_singular: "category"
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { name: name, label: "Category name", widget: string }
+              - { name: sub, label: "Short description", widget: string }
+          - name: services
+            label: "Services"
+            label_singular: "service"
+            widget: list
+            summary: "{{fields.name}} — {{fields.price}}"
+            fields:
+              - { name: name, label: "Name", widget: string }
+              - { name: category, label: "Category", widget: string, hint: "Must match a category name above." }
+              - { name: duration, label: "Duration", widget: string, required: false }
+              - { name: price, label: "Price", widget: string, required: false }
+              - { name: blurb, label: "Home-page card text", widget: text, required: false }
+              - { name: desc, label: "Services-menu text", widget: text, required: false }
+              - { name: featured, label: "Show as a card on the home page?", widget: boolean, default: false }
+              - { name: link, label: "Detail page link (optional)", widget: string, required: false, hint: "e.g. treatment.html?slug=glo2facial" }
+              - { name: img, label: "Photo (optional)", widget: image, required: false, choose_url: false }
+
+      # ---- Reviews -----------------------------------------------------------
+      - name: reviews
+        label: "Reviews"
+        file: "content/reviews.json"
+        description: "Client testimonials. The first 3 appear on the home page."
+        fields:
+          - name: reviews
+            label: "Reviews"
+            label_singular: "review"
+            widget: list
+            summary: "{{fields.name}} — {{fields.service}}"
+            fields:
+              - { name: name, label: "Reviewer name", widget: string }
+              - { name: service, label: "Treatment", widget: string, required: false }
+              - { name: text, label: "Review", widget: text }
+              - { name: featured, label: "Use as the big featured quote?", widget: boolean, default: false }
+
+      # ---- Treatment detail pages -------------------------------------------
+      - name: treatments
+        label: "Treatment Pages"
+        file: "content/treatments.json"
+        description: "The in-depth 'Learn more' pages."
+        fields:
+          - name: treatments
+            label: "Treatments"
+            label_singular: "treatment"
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { name: slug, label: "URL slug (unique; letters & dashes)", widget: string }
+              - { name: name, label: "Name", widget: string }
+              - { name: tagline, label: "Tagline", widget: string, required: false }
+              - { name: price, label: "Price", widget: string, required: false }
+              - { name: img, label: "Photo (optional)", widget: image, required: false, choose_url: false }
+              - name: facts
+                label: "Quick facts"
+                widget: object
+                required: false
+                fields:
+                  - { name: duration, label: "Time", widget: string, required: false }
+                  - { name: downtime, label: "Downtime", widget: string, required: false }
+                  - { name: series, label: "Plan", widget: string, required: false }
+                  - { name: bestFor, label: "Best for", widget: string, required: false }
+                  - { name: suitableFor, label: "Suitable for", widget: string, required: false }
+              - { name: lead, label: "Intro paragraph", widget: text }
+              - name: sections
+                label: "Sections"
+                label_singular: "section"
+                widget: list
+                required: false
+                summary: "{{fields.h}}"
+                fields:
+                  - { name: h, label: "Heading", widget: string }
+                  - { name: body, label: "Body (HTML allowed)", widget: text }
+              - { name: benefitsTitle, label: "Benefits heading (optional)", widget: string, required: false }
+              - name: benefits
+                label: "Benefits"
+                widget: list
+                required: false
+                field: { name: benefit, label: "Benefit", widget: string }
+              - name: closingSections
+                label: "Closing sections (optional)"
+                label_singular: "section"
+                widget: list
+                required: false
+                summary: "{{fields.h}}"
+                fields:
+                  - { name: h, label: "Heading", widget: string }
+                  - { name: body, label: "Body (HTML allowed)", widget: text }
+
+      # ---- Treatment plans / packages ---------------------------------------
+      - name: packages
+        label: "Treatment Plans"
+        file: "content/packages.json"
+        fields:
+          - name: packages
+            label: "Plans"
+            label_singular: "plan"
+            widget: list
+            summary: "{{fields.name}}"
+            fields:
+              - { name: name, label: "Name", widget: string }
+              - { name: tagline, label: "Tagline", widget: string, required: false }
+              - { name: forWho, label: "Best for", widget: string, required: false }
+              - { name: desc, label: "Description", widget: text, required: false }
+              - name: includes
+                label: "Includes"
+                widget: list
+                required: false
+                field: { name: item, label: "Item", widget: string }
+              - { name: note, label: "Pricing / scheduling note", widget: string, required: false }
+              - { name: popular, label: "Show 'Most Popular' ribbon?", widget: boolean, default: false }
+
+      # ---- Blog posts --------------------------------------------------------
+      - name: posts
+        label: "Blog Posts"
+        file: "content/posts.json"
+        fields:
+          - name: posts
+            label: "Posts"
+            label_singular: "post"
+            widget: list
+            summary: "{{fields.title}}"
+            fields:
+              - { name: slug, label: "URL slug (unique; letters & dashes)", widget: string }
+              - { name: title, label: "Title", widget: string }
+              - { name: tag, label: "Tag", widget: string, required: false }
+              - { name: date, label: "Date", widget: string, required: false }
+              - { name: readTime, label: "Read time", widget: string, required: false }
+              - { name: excerpt, label: "Excerpt", widget: text, required: false }
+              - { name: img, label: "Photo (optional)", widget: image, required: false, choose_url: false }
+              - { name: body, label: "Article (HTML allowed)", widget: text }
+
+      # ---- FAQ ---------------------------------------------------------------
+      - name: faq
+        label: "FAQ"
+        file: "content/faq.json"
+        fields:
+          - name: faq
+            label: "Questions"
+            label_singular: "question"
+            widget: list
+            summary: "{{fields.q}}"
+            fields:
+              - { name: q, label: "Question", widget: string }
+              - { name: a, label: "Answer (HTML allowed)", widget: text }
+
+      # ---- Photo gallery -----------------------------------------------------
+      - name: gallery
+        label: "Photo Gallery"
+        file: "content/gallery.json"
+        fields:
+          - name: beforeAfter
+            label: "Before / after pairs"
+            label_singular: "pair"
+            widget: list
+            required: false
+            summary: "{{fields.treatment}}"
+            fields:
+              - { name: treatment, label: "Treatment / caption", widget: string }
+              - { name: before, label: "Before photo", widget: image, required: false, choose_url: false }
+              - { name: after, label: "After photo", widget: image, required: false, choose_url: false }
+          - name: gallery
+            label: "Photo grid"
+            label_singular: "photo"
+            widget: list
+            required: false
+            summary: "{{fields.treatment}}"
+            fields:
+              - { name: treatment, label: "Caption", widget: string }
+              - { name: img, label: "Photo", widget: image, required: false, choose_url: false }

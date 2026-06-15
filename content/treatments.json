@@ -1,0 +1,155 @@
+{
+  "treatments": [
+    {
+      "slug": "glo2facial",
+      "name": "Glo2Facial",
+      "tagline": "Oxygenate • Exfoliate • Rejuvenate",
+      "price": "$179+",
+      "img": "",
+      "facts": {
+        "duration": "60+ min",
+        "downtime": "None",
+        "series": "Great as a one-off or monthly",
+        "bestFor": "Dullness, dryness, instant glow"
+      },
+      "lead": "Experience the facial that does more than create a temporary glow. Glo2Facial is an advanced 3-in-1 treatment that oxygenates the skin's natural regeneration from within, gently exfoliates dull surface cells, and infuses customized active ingredients for healthier, brighter, more radiant skin.<br><br>Unlike traditional facials that work primarily on the surface, Glo2Facial activates the skin's natural oxygenation process to improve circulation, support cellular renewal, and enhance ingredient absorption.<br><br>The result? Immediate glow, improved hydration, smoother texture, and healthier skin that continues to improve over time.",
+      "sections": [
+        {
+          "h": "What Is the Glo2Facial?",
+          "body": "<p>Glo2Facial is an advanced treatment powered by Geneo technology that combines oxygenation, exfoliation, lymphatic stimulation, and customized ingredient infusion in a single treatment.</p><p>Using patented OxyPods and treatment-specific formulations, Glo2Facial improves skin health while delivering an immediate, visible glow without irritation or downtime.</p><p>At Polished Skin, Glo2Facial is one of our most requested treatments because it supports healthy skin function while addressing a wide variety of concerns.</p>"
+        },
+        {
+          "h": "How Glo2Facial Works",
+          "body": "<h3>Step 1: Oxfoliation</h3><p>The treatment begins with gentle exfoliation using customized OxyPods that remove dead skin cells while creating the ideal environment for healthy skin renewal.</p><p>Unlike harsh exfoliation methods, Oxfoliation helps improve texture and radiance without compromising the skin barrier. As the OxyPod interacts with the treatment gel, carbon dioxide bubbles form on the skin's surface.</p><p>This triggers the body's natural <strong>Bohr Effect</strong>, increasing oxygen-rich blood flow to the skin. More oxygen means improved circulation, healthier cellular activity, and a brighter, more revitalized complexion.</p><h3>Step 2: LUXE Ultrasound Infusion</h3><p>Customized serums are infused into the skin using ultrasound technology, enhancing absorption and delivering active ingredients where they are needed most.</p><p>Depending on your goals, ingredients may focus on hydration, brightening, age management, barrier support, or calming inflammation.</p><h3>Step 3: Lymphatic Detoxification Massage</h3><p>A gentle vibrating lymphatic massage helps reduce puffiness, improve circulation, and support healthy skin function.</p><p>This step leaves the skin looking refreshed, sculpted, and revitalized.</p>"
+        },
+        {
+          "h": "Why Glo2Facial Is Different",
+          "body": "<p>Many facials focus on exfoliation alone.</p><p>Glo2Facial goes beyond the surface by supporting the skin's natural biological processes. Instead of stressing the skin, it improves oxygenation, circulation, hydration, and ingredient absorption while strengthening overall skin function.</p><p>That's why it's one of our favorite treatments for maintaining healthy, resilient skin — and why many clients choose it as their monthly skincare treatment.</p>"
+        }
+      ],
+      "benefitsTitle": "Why Clients Love Glo2Facial",
+      "benefits": [
+        "Instant, lit-from-within glow with zero downtime",
+        "Deep exfoliation + nutrient infusion in one session",
+        "Boosts oxygenation, circulation, and collagen",
+        "Hydrates, plumps, and evens skin tone",
+        "Customizable OxyPods for your skin's needs",
+        "Gentle enough for sensitive skin"
+      ]
+    },
+    {
+      "slug": "procell-microchanneling",
+      "name": "ProCell Microchanneling",
+      "tagline": "Microneedling, evolved — rebuild your skin with growth factors.",
+      "price": "$299+",
+      "img": "",
+      "facts": {
+        "duration": "60+ min",
+        "downtime": "Mild redness ~24 hrs",
+        "series": "Series of 3–6 recommended",
+        "bestFor": "Fine lines, scars, texture, pores"
+      },
+      "lead": "ProCell Microchanneling is one of the most effective ways to genuinely rebuild your skin — not break it down. By gently prompting your skin's own healing response and feeding it with stem-cell-derived growth factors, it firms, smooths, and renews from the inside out.",
+      "sections": [
+        {
+          "h": "How it works",
+          "body": "<p>A ProCell device creates hundreds of thousands of microscopic channels in the skin's surface. Each tiny channel signals your body to repair — kicking off a natural healing cascade that produces fresh <strong>collagen and elastin</strong>. Immediately after, we apply ProCell's bioengineered serum, rich in growth factors and cytokines, delivered straight through those channels to where they work hardest.</p>"
+        },
+        {
+          "h": "What makes it different",
+          "body": "<p>Traditional microneedling usually relies on basic serums like hyaluronic acid. ProCell's difference is the <strong>growth-factor serum</strong> — bioactive signaling molecules that amplify cell-to-cell communication and supercharge renewal. (ProCell's delivery system uses lab-produced recombinant growth factors — no human tissue, blood, or cells.)</p>"
+        },
+        {
+          "h": "What to expect",
+          "body": "<p>Most clients feel light vibration and mild pressure. Afterward your skin may look lightly flushed for about a day. Results build over the following weeks as new collagen forms, and they compound beautifully over a series of sessions.</p>"
+        }
+      ],
+      "benefits": [
+        "Rebuilds collagen and elastin naturally",
+        "Softens fine lines and wrinkles",
+        "Visibly improves acne scarring and texture",
+        "Refines the look of enlarged pores",
+        "Evens tone and reduces hyperpigmentation",
+        "Minimal downtime — most redness fades within a day"
+      ]
+    },
+    {
+      "slug": "biorepeel",
+      "name": "BioRePeel",
+      "tagline": "The no-downtime peel that rebuilds as it resurfaces.",
+      "price": "$129+",
+      "img": "",
+      "facts": {
+        "duration": "45+ min",
+        "downtime": "Little to none",
+        "series": "Series of 4–6 for best results",
+        "bestFor": "Aging Skin, Acne, Hyperpigmentation, Dullness, Texture, Enlarged Pores",
+        "suitableFor": "Most Skin Types & Fitzpatrick Skin Types"
+      },
+      "lead": "BioRePeel is a next-generation Italian peel that resurfaces and bio-stimulates at the same time — so it rebuilds your skin rather than simply stripping it. It refreshes tone and texture with little to no downtime, and can be done year-round.",
+      "sections": [
+        {
+          "h": "How it works",
+          "body": "<p>BioRePeel uses a patented two-phase (biphasic) formula. One phase gently exfoliates with <strong>35% TCA</strong> and fruit acids, loosening dead, dull cells to reveal fresher skin. The other phase floods the skin with amino acids, vitamins C and B2, and antioxidants that stimulate fibroblasts and support collagen — repairing and strengthening as it renews.</p>"
+        },
+        {
+          "h": "Why it's different",
+          "body": "<p>Unlike traditional peels, BioRePeel is designed for <strong>little to no visible peeling or downtime</strong>, and because it's gentle on the skin barrier it can be performed in any season — even summer. It's suitable for most skin types and tones.</p>"
+        }
+      ],
+      "benefitsTitle": "Why Clients Love BioRePeel",
+      "benefits": [
+        "Little to no downtime",
+        "Minimal visible peeling",
+        "Suitable year-round",
+        "Safe for most skin types",
+        "Improves multiple concerns simultaneously",
+        "Can be combined with other treatments",
+        "Supports healthy aging",
+        "Creates visible results without aggressive treatment"
+      ],
+      "closingSections": [
+        {
+          "h": "Frequently Asked Questions",
+          "body": "<h3>Will I Peel?</h3><p>Most clients experience little to no visible peeling. Some may notice mild flaking depending on skin condition and treatment goals.</p><h3>Is BioRePeel Painful?</h3><p>Most clients find the treatment very comfortable. You may experience mild tingling during application.</p><h3>How Many Treatments Will I Need?</h3><p>While many clients notice improvement after one treatment, a series of 4–6 treatments generally provides the best corrective results.</p><h3>Can I Get BioRePeel Year-Round?</h3><p>Yes. BioRePeel can typically be performed throughout the year when paired with proper sun protection.</p><h3>Can BioRePeel Be Combined With Other Treatments?</h3><p>Absolutely. BioRePeel is commonly paired with treatments such as Glo2Facial®, Jet Plasma®, LED Light Therapy, and customized corrective skincare protocols.</p>"
+        },
+        {
+          "h": "Why Choose Polished Skin for BioRePeel in Eugene?",
+          "body": "<p>At Polished Skin, every treatment begins with a personalized skin assessment. We customize each BioRePeel treatment based on your skin condition, goals, and overall treatment plan.</p><p>Our focus is not simply creating temporary results — it's helping your skin become healthier, stronger, and more resilient over time.</p><p>If you're looking for BioRePeel in Eugene, Oregon, <a href=\"https://polishedskineugene.glossgenius.com/services\" target=\"_blank\" rel=\"noopener\">schedule a consultation</a> and discover how this innovative Italian peel can help you achieve brighter, smoother, healthier-looking skin.</p>"
+        }
+      ]
+    },
+    {
+      "slug": "jet-plasma",
+      "name": "Jet Plasma®",
+      "tagline": "Lift • Tighten • Revitalize",
+      "price": "$249+",
+      "img": "",
+      "facts": {
+        "duration": "60+ min",
+        "downtime": "None",
+        "series": "Great as a one-off or a series",
+        "bestFor": "Firmness, fine lines, dull or inflamed skin"
+      },
+      "lead": "Jet Plasma® is a non-invasive treatment that supports collagen production, improves skin firmness, reduces inflammation, and enhances overall skin health — all without downtime. It works with your skin to lift, tighten, and revitalize, rather than breaking it down.",
+      "sections": [
+        {
+          "h": "How it works",
+          "body": "<p>Jet Plasma delivers gentle plasma energy to the surface of the skin, energizing the cells beneath without breaking the skin or requiring recovery time. This encourages your skin's own repair processes and stimulates fresh <strong>collagen</strong> — the protein responsible for firm, smooth, resilient skin — while calming redness and inflammation.</p>"
+        },
+        {
+          "h": "Why we love it",
+          "body": "<p>It's a true no-downtime treatment: you can come in before an event or on a break and leave with calmer, firmer, more revitalized skin. Because it's non-invasive and soothing, it suits even sensitive skin and pairs beautifully with our facials and other treatments.</p>"
+        }
+      ],
+      "benefits": [
+        "Supports your skin's natural collagen production",
+        "Lifts, firms, and tightens",
+        "Calms redness and inflammation",
+        "Improves overall skin health and resilience",
+        "Non-invasive with zero downtime",
+        "Pairs well with facials and other treatments"
+      ]
+    }
+  ]
+}
