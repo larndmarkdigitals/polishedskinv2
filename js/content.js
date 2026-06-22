@@ -16,7 +16,10 @@
   var BOOK = "https://polishedskineugene.glossgenius.com/services";
 
   // populated from the JSON files before render() runs
-  var S = [], SC = [], R = [], P = [], T = [], PK = [], FAQ = [], GBA = [], GAL = [];
+  var S = [], SC = [], R = [], P = [], T = [], PK = [], FAQ = [], GBA = [], GAL = [], HOME = {}, SITE = {};
+
+  // Markdown -> HTML (from js/md.js); falls back to raw text if not loaded.
+  function md(s) { return window.PSE_md ? window.PSE_md(s) : (s || ''); }
 
   function svcImg(s, cls) {
     return s && s.img
@@ -28,8 +31,9 @@
     // No price on the home page — pricing lives on the Services page only.
     var link = s.link || 'services.html';
     var label = s.link ? 'Learn more →' : 'View details →';
+    var lead = s.tagline ? '<strong>' + s.tagline + '</strong><br>' : '';
     return '<div class="svc-card reveal">' + svcImg(s, 'svc-img') +
-      '<div class="svc-body"><h3>' + s.name + '</h3><p>' + s.blurb + '</p>' +
+      '<div class="svc-body"><h3>' + s.name + '</h3><p>' + lead + (s.blurb || '') + '</p>' +
       '<div class="svc-meta"><a href="' + link + '" class="svc-link">' + label + '</a></div></div></div>';
   }
 
@@ -62,7 +66,58 @@
 
   function set(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
 
+  /* ---- data-attribute bindings (home page + shared footer/business) ---- */
+  function resolvePath(obj, path) {
+    return path.split('.').reduce(function (o, k) { return (o == null) ? undefined : o[k]; }, obj);
+  }
+  function eachAttr(attr, cb) {
+    Array.prototype.forEach.call(document.querySelectorAll('[' + attr + ']'), cb);
+  }
+  function bind(root, attr, apply) {
+    eachAttr(attr, function (el) {
+      var v = resolvePath(root, el.getAttribute(attr));
+      if (v != null) apply(el, v);
+    });
+  }
+
+  function applyHome(H) {
+    if (!H) return;
+    bind(H, 'data-h', function (el, v) { el.textContent = v; });
+    bind(H, 'data-h-para', function (el, v) { el.innerHTML = String(v).replace(/\n/g, '<br>'); });
+    bind(H, 'data-h-md', function (el, v) {
+      var html = md(v);
+      if (el.hasAttribute('data-lead')) html = html.replace(/^<p>/, '<p class="lead">');
+      el.innerHTML = html;
+    });
+  }
+
+  function applySite(SITE) {
+    if (!SITE) return;
+    var b = SITE.business || {}, f = SITE.footer || {};
+    bind(SITE, 'data-s', function (el, v) { el.textContent = v; });
+    var tel = function () {
+      return '<a href="tel:' + (b.phoneDigits || '') + '">' + (b.phone || '') + '</a>';
+    };
+    eachAttr('data-s-footvisit', function (el) {
+      el.innerHTML = (b.addressLine || '') + '<br>' + (b.cityStateZip || '') + '<br>' + tel() + '<br><br>' +
+        (b.hoursNote || '') + '<br>' + (b.closedNote || '') + '<br><br>' +
+        '<a href="' + BOOK + '" target="_blank" rel="noopener" style="color:var(--teal);font-weight:600;">' + (f.bookLink || 'Book online →') + '</a>';
+    });
+    eachAttr('data-s-visitcontact', function (el) {
+      el.innerHTML = '<strong>' + (b.name || '') + '</strong><br>' + (b.addressLine || '') + '<br>' + (b.cityStateZip || '') + '<br>' + tel();
+    });
+    eachAttr('data-s-hours', function (el) {
+      el.innerHTML = (b.hours || []).map(function (h) {
+        return '<div class="hours-row' + (h.closed ? ' closed' : '') + '"><span class="day">' + h.day + '</span><span class="time">' + h.time + '</span></div>';
+      }).join('');
+    });
+  }
+
   function render() {
+    /* ---- HOME page copy + shared footer/business info ---- */
+    applyHome(HOME);
+    applySite(SITE);
+
     /* ---- HOME: featured services (up to 4) ---- */
     var featSvc = S.filter(function (s) { return s.featured; });
     if (!featSvc.length) featSvc = S;
@@ -137,7 +192,8 @@
           hero.innerHTML = post.img ? '<img loading="lazy" decoding="async" src="' + post.img + '" alt="">' : SPARK;
           if (!post.img) hero.classList.add('img-ph');
         }
-        article.innerHTML = post.body;
+        // keep the larger "lead" styling on the first paragraph
+        article.innerHTML = md(post.body).replace(/^<p>/, '<p class="post-lead">');
       }
     }
 
@@ -162,7 +218,7 @@
       set('faq-list', FAQ.map(function (f) {
         return '<div class="faq-item"><button class="faq-q" aria-expanded="false">' +
           '<span>' + f.q + '</span><span class="faq-ic"></span></button>' +
-          '<div class="faq-a"><div class="faq-a-in">' + f.a + '</div></div></div>';
+          '<div class="faq-a"><div class="faq-a-in">' + md(f.a) + '</div></div></div>';
       }).join(''));
       Array.prototype.forEach.call(document.querySelectorAll('.faq-q'), function (btn) {
         btn.addEventListener('click', function () {
@@ -191,12 +247,13 @@
         if (t.facts) set('t-facts', factItem('Time', t.facts.duration) + factItem('Downtime', t.facts.downtime) + factItem('Plan', t.facts.series) + factItem('Best for', t.facts.bestFor) + factItem('Suitable for', t.facts.suitableFor));
         var th = document.getElementById('t-hero-img');
         if (th) { th.innerHTML = t.img ? '<img loading="lazy" decoding="async" src="' + t.img + '" alt="' + t.name + '">' : SPARK; if (!t.img) th.classList.add('img-ph'); }
-        var body = '<p class="post-lead">' + t.lead + '</p>';
-        (t.sections || []).forEach(function (s) { body += '<h2>' + s.h + '</h2>' + s.body; });
+        var body = String(t.lead || '').split(/\n{2,}/).filter(Boolean)
+          .map(function (p) { return '<p class="post-lead">' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
+        (t.sections || []).forEach(function (s) { body += '<h2>' + s.h + '</h2>' + md(s.body); });
         if (t.benefits && t.benefits.length) {
           body += '<h2>' + (t.benefitsTitle || 'Benefits') + '</h2><ul class="t-benefits">' + t.benefits.map(function (b) { return '<li>' + b + '</li>'; }).join('') + '</ul>';
         }
-        (t.closingSections || []).forEach(function (s) { body += '<h2>' + s.h + '</h2>' + s.body; });
+        (t.closingSections || []).forEach(function (s) { body += '<h2>' + s.h + '</h2>' + md(s.body); });
         tEl.innerHTML = body;
       }
     }
@@ -223,7 +280,9 @@
     getJSON('content/treatments.json').catch(function () { return {}; }),
     getJSON('content/packages.json').catch(function () { return {}; }),
     getJSON('content/faq.json').catch(function () { return {}; }),
-    getJSON('content/gallery.json').catch(function () { return {}; })
+    getJSON('content/gallery.json').catch(function () { return {}; }),
+    getJSON('content/home.json').catch(function () { return {}; }),
+    getJSON('content/site.json').catch(function () { return {}; })
   ]).then(function (res) {
     var sv = res[0] || {}; SC = sv.categories || []; S = sv.services || [];
     R = (res[1] || {}).reviews || [];
@@ -232,6 +291,8 @@
     PK = (res[4] || {}).packages || [];
     FAQ = (res[5] || {}).faq || [];
     var g = res[6] || {}; GBA = g.beforeAfter || []; GAL = g.gallery || [];
+    HOME = res[7] || {};
+    SITE = res[8] || {};
     try { render(); } catch (e) { if (window.console) console.error('content render failed', e); }
     ready();
   });

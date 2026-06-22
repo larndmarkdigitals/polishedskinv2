@@ -394,6 +394,9 @@ section{ padding:96px 0; }
 .faq-a{ max-height:0; overflow:hidden; transition:max-height .3s ease; }
 .faq-item.open .faq-a{ max-height:460px; }
 .faq-a-in{ padding:0 22px 22px; color:var(--body); font-size:15.5px; line-height:1.75; }
+.faq-a-in p{ margin:0 0 12px; }
+.faq-a-in p:last-child{ margin-bottom:0; }
+.faq-a-in ul,.faq-a-in ol{ margin:0 0 12px 20px; }
 
 /* ---------- Treatment detail page ---------- */
 .t-facts{ display:flex; flex-wrap:wrap; gap:14px; justify-content:center; margin-top:26px; }

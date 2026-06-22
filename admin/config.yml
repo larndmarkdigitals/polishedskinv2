@@ -33,6 +33,170 @@ collections:
     editor:
       preview: false
     files:
+      # ---- Home Page --------------------------------------------------------
+      - name: home
+        label: "Home Page"
+        file: "content/home.json"
+        description: "All the text on the home page."
+        fields:
+          - name: hero
+            label: "Hero (top of page)"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: pill, label: "Eyebrow pill", widget: string }
+              - { name: heading, label: "Headline", widget: string }
+              - { name: headingAccent, label: "Headline — script accent", widget: string }
+              - { name: lede, label: "Intro paragraph(s)", widget: text, hint: "Leave a blank line between paragraphs." }
+              - { name: primaryButton, label: "Primary button", widget: string }
+              - { name: secondaryButton, label: "Secondary button", widget: string }
+              - { name: trustLine, label: "Trust line", widget: string }
+              - { name: badgeRating, label: "Badge rating", widget: string }
+              - { name: badgeReviews, label: "Badge reviews", widget: string }
+              - { name: badgeNote, label: "Badge note", widget: string }
+          - name: trustStrip
+            label: "Trust strip (4 items)"
+            widget: list
+            collapsed: true
+            summary: "{{fields.top}}"
+            fields:
+              - { name: top, label: "Top line", widget: string }
+              - { name: sub, label: "Sub line", widget: string }
+          - name: services
+            label: "Services preview"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: sub, label: "Subtext", widget: text }
+              - { name: button, label: "Button", widget: string }
+          - name: science
+            label: "How it works"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: body, label: "Body", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
+              - { name: button, label: "Button", widget: string }
+              - name: steps
+                label: "Steps (3)"
+                widget: list
+                summary: "{{fields.title}}"
+                fields:
+                  - { name: title, label: "Title", widget: string }
+                  - { name: text, label: "Text", widget: text }
+          - name: results
+            label: "Results / before-after"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: body, label: "Body", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
+              - { name: galleryButton, label: "Gallery button", widget: string }
+              - { name: bookButton, label: "Book button", widget: string }
+          - name: about
+            label: "About teaser"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: headingSuffix, label: "Heading — after accent", widget: string }
+              - { name: body, label: "Body", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
+              - name: chips
+                label: "Chips"
+                widget: list
+                field: { name: chip, label: "Chip", widget: string }
+              - { name: button, label: "Button", widget: string }
+          - name: reviewsSection
+            label: "Reviews preview"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: sub, label: "Subtext", widget: string }
+              - { name: button, label: "Button", widget: string }
+          - name: why
+            label: "Why clients trust us"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - name: cards
+                label: "Cards (6)"
+                widget: list
+                summary: "{{fields.title}}"
+                fields:
+                  - { name: title, label: "Title", widget: string }
+                  - { name: text, label: "Text", widget: text }
+          - name: visit
+            label: "Visit section"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: sub, label: "Subtext", widget: string }
+              - { name: hoursTitle, label: "Hours title", widget: string }
+              - { name: directionsButton, label: "Directions button", widget: string }
+          - name: cta
+            label: "Call to action (bottom)"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: text, label: "Text", widget: string }
+              - { name: button, label: "Button", widget: string }
+
+      # ---- Site & Footer (every page) ---------------------------------------
+      - name: site
+        label: "Site & Footer"
+        file: "content/site.json"
+        description: "Business info (hours, address, phone) and footer text — shown on every page."
+        fields:
+          - name: business
+            label: "Business info"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: name, label: "Business name", widget: string }
+              - { name: addressLine, label: "Street address", widget: string }
+              - { name: cityStateZip, label: "City, State ZIP", widget: string }
+              - { name: phone, label: "Phone (display)", widget: string }
+              - { name: phoneDigits, label: "Phone (digits only, for tap-to-call)", widget: string }
+              - name: hours
+                label: "Hours"
+                widget: list
+                summary: "{{fields.day}} — {{fields.time}}"
+                fields:
+                  - { name: day, label: "Day", widget: string }
+                  - { name: time, label: "Hours", widget: string }
+                  - { name: closed, label: "Closed?", widget: boolean, default: false }
+              - { name: hoursNote, label: "Hours note (footer)", widget: string }
+              - { name: closedNote, label: "Closed note (footer)", widget: string }
+          - name: footer
+            label: "Footer"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: blurb, label: "Footer blurb", widget: text }
+              - { name: exploreHeading, label: "'Explore' heading", widget: string }
+              - { name: visitHeading, label: "'Visit' heading", widget: string }
+              - { name: bookLink, label: "Book link text", widget: string }
+              - { name: bottomLeft, label: "Bottom-left line", widget: string }
+              - { name: bottomRight, label: "Bottom-right line", widget: string }
+
       # ---- Services & Prices -------------------------------------------------
       - name: services
         label: "Services & Prices"
@@ -54,11 +218,12 @@ collections:
             summary: "{{fields.name}} — {{fields.price}}"
             fields:
               - { name: name, label: "Name", widget: string }
+              - { name: tagline, label: "Card tagline (optional)", widget: string, required: false, hint: "Short bold line above the description on the home-page cards." }
               - { name: category, label: "Category", widget: string, hint: "Must match a category name above." }
               - { name: duration, label: "Duration", widget: string, required: false }
               - { name: price, label: "Price", widget: string, required: false }
-              - { name: blurb, label: "Home-page card text", widget: text, required: false }
-              - { name: desc, label: "Services-menu text", widget: text, required: false }
+              - { name: blurb, label: "Short description", widget: text, required: false }
+              - { name: desc, label: "Services-menu description", widget: text, required: false }
               - { name: featured, label: "Show as a card on the home page?", widget: boolean, default: false }
               - { name: link, label: "Detail page link (optional)", widget: string, required: false, hint: "e.g. treatment.html?slug=glo2facial" }
               - { name: img, label: "Photo (optional)", widget: image, required: false, choose_url: false }
@@ -107,7 +272,7 @@ collections:
                   - { name: series, label: "Plan", widget: string, required: false }
                   - { name: bestFor, label: "Best for", widget: string, required: false }
                   - { name: suitableFor, label: "Suitable for", widget: string, required: false }
-              - { name: lead, label: "Intro paragraph", widget: text }
+              - { name: lead, label: "Intro paragraph(s)", widget: text, hint: "Leave a blank line between paragraphs." }
               - name: sections
                 label: "Sections"
                 label_singular: "section"
@@ -116,7 +281,7 @@ collections:
                 summary: "{{fields.h}}"
                 fields:
                   - { name: h, label: "Heading", widget: string }
-                  - { name: body, label: "Body (HTML allowed)", widget: text }
+                  - { name: body, label: "Body", widget: markdown, buttons: [bold, italic, link, heading-three, bulleted-list], editor_components: [] }
               - { name: benefitsTitle, label: "Benefits heading (optional)", widget: string, required: false }
               - name: benefits
                 label: "Benefits"
@@ -131,7 +296,7 @@ collections:
                 summary: "{{fields.h}}"
                 fields:
                   - { name: h, label: "Heading", widget: string }
-                  - { name: body, label: "Body (HTML allowed)", widget: text }
+                  - { name: body, label: "Body", widget: markdown, buttons: [bold, italic, link, heading-three, bulleted-list], editor_components: [] }
 
       # ---- Treatment plans / packages ---------------------------------------
       - name: packages
@@ -174,7 +339,7 @@ collections:
               - { name: readTime, label: "Read time", widget: string, required: false }
               - { name: excerpt, label: "Excerpt", widget: text, required: false }
               - { name: img, label: "Photo (optional)", widget: image, required: false, choose_url: false }
-              - { name: body, label: "Article (HTML allowed)", widget: text }
+              - { name: body, label: "Article", widget: markdown, buttons: [bold, italic, link, heading-two, heading-three, bulleted-list, numbered-list], editor_components: [] }
 
       # ---- FAQ ---------------------------------------------------------------
       - name: faq
@@ -188,7 +353,7 @@ collections:
             summary: "{{fields.q}}"
             fields:
               - { name: q, label: "Question", widget: string }
-              - { name: a, label: "Answer (HTML allowed)", widget: text }
+              - { name: a, label: "Answer", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
 
       # ---- Photo gallery -----------------------------------------------------
       - name: gallery

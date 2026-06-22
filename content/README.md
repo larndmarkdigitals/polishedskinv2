@@ -4,9 +4,10 @@ The site's text, services, prices, reviews, blog posts, FAQ, and photo captions
 live as data files in this `content/` folder, in a format called **JSON**.
 Editing these files changes the site — no need to touch any page code.
 
-> **Coming soon:** a friendly admin editor at `/admin` so you can change all of
-> this from simple web forms instead of editing JSON by hand. Until that's set
-> up, this guide covers editing the files directly.
+> **Easiest way:** use the admin editor at **`/admin`** — it gives you simple
+> web forms (and a rich-text editor with Bold / Heading / List buttons for the
+> long content) instead of editing JSON by hand. This guide covers editing the
+> files directly, for when you'd rather do that.
 
 ## Before you start: how to view the site
 
@@ -22,6 +23,8 @@ will look empty. View the site through a web address instead:
 
 | File | Controls | Shows up on |
 |------|----------|-------------|
+| `home.json` | All home-page text (hero, section intros, steps, cards, CTA) | Home page |
+| `site.json` | Footer wording + business info (hours, address, phone) | Every page |
 | `services.json` | Treatments, prices, durations, descriptions, categories | Home (featured cards) + Services page |
 | `treatments.json` | In-depth treatment detail pages | "Learn more" treatment pages |
 | `packages.json` | Treatment plans (curated series) | Packages page |
@@ -38,13 +41,32 @@ JSON is stricter than a normal document — a single typo can break the file, so
 - Separate items with commas, but **never put a comma after the last** item in a
   list `[ ]` or block `{ }`.
 - **No comments** are allowed in the file.
-- To use a `"` inside your text, write `\"` (a backslash first). To start a new
-  paragraph in long text, use `<p>...</p>` rather than pressing Enter.
+- To use a `"` inside your text, write `\"` (a backslash first).
+- For the long content fields (blog article, FAQ answers, treatment sections),
+  the text is **Markdown** — just leave a blank line between paragraphs, use
+  `**bold**`, `## Heading`, and `- ` for bullet lists. (The `/admin` editor does
+  this for you with toolbar buttons.)
 - When you're done, paste the whole file into <https://jsonlint.com> to confirm
   it's valid **before** publishing. If the site goes blank, a JSON typo is
   almost always why.
 
 ## Field reference
+
+### home.json
+All the text on the home page, grouped by section (`hero`, `trustStrip`,
+`services`, `science`, `results`, `about`, `reviewsSection`, `why`, `visit`,
+`cta`). Headings that have a cursive accent are split into two fields, e.g.
+`heading` ("Treatments that work with") + `headingAccent` ("your skin"). The
+longer blocks (`science.body`, `results.body`, `about.body`) are **Markdown**.
+Easiest edited from the **Home Page** section in `/admin`.
+
+### site.json
+Shared across every page: `business` (name, address, phone, and the weekly
+`hours` list) and `footer` (blurb, headings, bottom lines). Editing hours or
+address here updates the home page Visit section **and** the footer everywhere.
+Easiest edited from the **Site & Footer** section in `/admin`.
+> Note: the address/hours in the page's hidden SEO data and the Google Map are
+> set separately in the code — tell your developer if the address changes.
 
 ### services.json
 Shape: `{ "categories": [ … ], "services": [ … ] }`
@@ -57,7 +79,8 @@ Shape: `{ "categories": [ … ], "services": [ … ] }`
 - `name` — the treatment name
 - `category` — must exactly match one of the category `name`s above
 - `duration` — e.g. `"60 min"`  ·  `price` — e.g. `"$179+"`
-- `blurb` — short line on the **home** featured cards
+- `tagline` — optional short bold line above the description on home cards
+- `blurb` — short description (plain text) on the **home** featured cards
 - `desc` — longer line on the **Services** menu
 - `featured` — `true` shows it as a card on the home page (pick up to **4**)
 - `link` — optional detail page, e.g. `"treatment.html?slug=glo2facial"`
@@ -70,8 +93,8 @@ Shape: `[ … ]` — one block per "Learn more" detail page.
 - `name` — page heading  ·  `tagline` — one line under it  ·  `price`
 - `facts` — quick-facts strip: `{ duration, downtime, series, bestFor }`
   (and optional `suitableFor`)
-- `lead` — opening paragraph (plain text; `<br>` allowed)
-- `sections` — `[ { "h": "Heading", "body": "<p>HTML…</p>" } ]`
+- `lead` — opening paragraph(s); plain text, blank line between paragraphs
+- `sections` — `[ { "h": "Heading", "body": "Markdown…" } ]`
 - `benefits` — bullet list; `benefitsTitle` optionally names that list
 - `closingSections` — same shape as `sections`, shown after the benefits
 - `img` — photo path, or `""` for the placeholder
@@ -94,12 +117,12 @@ Shape: `[ … ]` — newest first.
 - `slug` — unique web name (letters/dashes) → link is `post.html?slug=THIS`
 - `title` · `tag` (category label) · `date` · `readTime`
 - `excerpt` — 1–2 sentence preview on the blog list
-- `body` — the article; write paragraphs in `<p>…</p>`, subheads in `<h2>…</h2>`,
-  lists in `<ul><li>…</li></ul>`
+- `body` — the article, in **Markdown** (blank line between paragraphs,
+  `## Subheading`, `- ` for bullets, `**bold**`)
 - `img` — photo path, or `""` for the placeholder
 
 ### faq.json
-Shape: `[ … ]` — `q` (question) and `a` (answer; HTML allowed).
+Shape: `[ … ]` — `q` (question) and `a` (answer, in **Markdown**).
 
 ### gallery.json
 Shape: `{ "beforeAfter": [ … ], "gallery": [ … ] }`

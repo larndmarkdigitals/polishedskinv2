@@ -1,0 +1,28 @@
+{
+  "business": {
+    "name": "Polished Skin",
+    "addressLine": "1603 Oak Street",
+    "cityStateZip": "Eugene, OR 97401",
+    "phone": "(541) 515-8845",
+    "phoneDigits": "5415158845",
+    "hours": [
+      { "day": "Sunday", "time": "Closed", "closed": true },
+      { "day": "Monday", "time": "Closed", "closed": true },
+      { "day": "Tuesday", "time": "9:00 AM – 7:00 PM" },
+      { "day": "Wednesday", "time": "10:00 AM – 5:00 PM" },
+      { "day": "Thursday", "time": "10:00 AM – 7:00 PM" },
+      { "day": "Friday", "time": "10:00 AM – 5:00 PM" },
+      { "day": "Saturday", "time": "10:00 AM – 5:00 PM" }
+    ],
+    "hoursNote": "Tue–Sat · By appointment",
+    "closedNote": "Closed Sun & Mon"
+  },
+  "footer": {
+    "blurb": "Eugene's clinic for age management and corrective skin care — expert facials, Glo2Facial, and microchanneling, personalized to your skin.",
+    "exploreHeading": "Explore",
+    "visitHeading": "Visit",
+    "bookLink": "Book online →",
+    "bottomLeft": "© 2026 Polished Skin · Eugene, Oregon",
+    "bottomRight": "Licensed Esthetician · ProCell Certified"
+  }
+}

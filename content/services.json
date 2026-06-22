@@ -97,11 +97,12 @@
       "category": "Advanced Treatments",
       "duration": "60+ min",
       "price": "$179+",
-      "blurb": "<strong>Oxygenate • Exfoliate • Rejuvenate</strong><br>Our signature oxygenating facial improves hydration, circulation, and skin vitality while leaving skin brighter, smoother, and instantly refreshed. Ideal for dullness, dehydration, sensitivity, and healthy aging.",
+      "blurb": "Our signature oxygenating facial combines gentle exfoliation, deep hydration, lymphatic stimulation, and customized ingredient infusion to leave skin brighter, smoother, healthier, and visibly refreshed. Perfect for dullness, dehydration, sensitivity, rosacea-prone skin, and healthy aging.",
       "desc": "Our most-loved treatment — a 3-in-1 oxygenating facial that exfoliates, triggers your skin's own oxygen surge, and infuses nourishing serums.",
       "featured": true,
       "link": "treatment.html?slug=glo2facial",
-      "img": ""
+      "img": "",
+      "tagline": "Oxygenate • Hydrate • Rejuvenate"
     },
     {
       "name": "Polished Skin Deluxe Glo2Facial",
@@ -118,7 +119,8 @@
       "category": "Advanced Treatments",
       "duration": "60+ min",
       "price": "$249+",
-      "blurb": "Non-invasive plasma energy that lifts, tightens, and revitalizes — supporting collagen with no downtime.",
+      "tagline": "Lift • Tighten • Revitalize",
+      "blurb": "This non-invasive treatment uses plasma energy to support collagen production, improve skin firmness, reduce inflammation, and enhance overall skin health. Ideal for clients seeking age-management benefits with no downtime.",
       "desc": "A non-invasive treatment that supports collagen production, improves skin firmness, reduces inflammation, and enhances overall skin health — with no downtime.",
       "featured": true,
       "link": "treatment.html?slug=jet-plasma",
@@ -139,11 +141,12 @@
       "category": "Microchanneling",
       "duration": "60+ min",
       "price": "$299+",
-      "blurb": "<strong>Stimulate Collagen • Improve Texture</strong><br>Advanced microchanneling with growth factors and peptides helps soften fine lines, improve skin texture, minimize acne scarring, and support firmer, healthier-looking skin.",
+      "blurb": "Advanced microchanneling creates controlled micro-channels that stimulate collagen and elastin production while enhancing the delivery of growth factors and peptides. Helps improve fine lines, acne scarring, enlarged pores, skin texture, and overall skin rejuvenation.",
       "desc": "Microchanneling paired with bioengineered stem-cell growth-factor serums to rebuild collagen and renew skin from within.",
       "featured": true,
       "link": "treatment.html?slug=procell-microchanneling",
-      "img": ""
+      "img": "",
+      "tagline": "Stimulate Collagen • Improve Texture • Renew Skin"
     },
     {
       "name": "Microchanneling & NexGen+ PDRN",
@@ -170,11 +173,12 @@
       "category": "Peels & Resurfacing",
       "duration": "45+ min",
       "price": "$129+",
-      "blurb": "<strong>Renew • Brighten • Restore</strong><br>A professional Italian chemical peel that stimulates cellular renewal while improving pigmentation, texture, acne, and signs of aging — with minimal downtime and maximum glow.",
+      "blurb": "This innovative Italian peel stimulates cellular renewal while improving pigmentation, acne, texture, fine lines, and dullness. Unlike traditional peels, BioRePeel delivers corrective results with minimal downtime and maximum glow.",
       "desc": "A two-phase Italian TCA peel that exfoliates while it bio-stimulates collagen — brighter, smoother, more even skin with little to no downtime.",
       "featured": true,
       "link": "treatment.html?slug=biorepeel",
-      "img": ""
+      "img": "",
+      "tagline": "Renew • Brighten • Restore"
     },
     {
       "name": "BioRePeel Deluxe",
