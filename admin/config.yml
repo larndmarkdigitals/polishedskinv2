@@ -27,6 +27,20 @@ local_backend: true
 media_folder: "img"
 public_folder: "/img"
 
+# Auto-optimize every uploaded photo, in the browser, before it's saved:
+# convert to WebP, cap the longest side at 2048px, ~85% quality, strip EXIF.
+# So you can drag in a raw phone photo and it gets compressed automatically.
+media_libraries:
+  all:
+    transformations:
+      raster_image:
+        format: webp
+        quality: 85
+        width: 2048
+        height: 2048
+      svg:
+        optimize: true
+
 collections:
   - name: content
     label: "Website Content"
@@ -54,6 +68,7 @@ collections:
               - { name: badgeRating, label: "Badge rating", widget: string }
               - { name: badgeReviews, label: "Badge reviews", widget: string }
               - { name: badgeNote, label: "Badge note", widget: string }
+              - { name: img, label: "Photo (Analisa / clinic — portrait ~4:5)", widget: image, required: false, choose_url: false }
           - name: trustStrip
             label: "Trust strip (4 items)"
             widget: list
@@ -100,6 +115,8 @@ collections:
               - { name: body, label: "Body", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
               - { name: galleryButton, label: "Gallery button", widget: string }
               - { name: bookButton, label: "Book button", widget: string }
+              - { name: beforeImg, label: "Before photo", widget: image, required: false, choose_url: false }
+              - { name: afterImg, label: "After photo", widget: image, required: false, choose_url: false }
           - name: about
             label: "About teaser"
             widget: object
@@ -115,6 +132,7 @@ collections:
                 widget: list
                 field: { name: chip, label: "Chip", widget: string }
               - { name: button, label: "Button", widget: string }
+              - { name: img, label: "Photo (clinic — portrait ~4:5)", widget: image, required: false, choose_url: false }
           - name: reviewsSection
             label: "Reviews preview"
             widget: object
@@ -158,6 +176,14 @@ collections:
               - { name: headingAccent, label: "Heading — script accent", widget: string }
               - { name: text, label: "Text", widget: string }
               - { name: button, label: "Button", widget: string }
+
+      # ---- About Page -------------------------------------------------------
+      - name: about
+        label: "About Page"
+        file: "content/about.json"
+        description: "Photo on the About page."
+        fields:
+          - { name: clinicPhoto, label: "Clinic photo (portrait ~4:5)", widget: image, required: false, choose_url: false }
 
       # ---- Site & Footer (every page) ---------------------------------------
       - name: site

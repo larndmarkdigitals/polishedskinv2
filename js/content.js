@@ -16,7 +16,7 @@
   var BOOK = "https://polishedskineugene.glossgenius.com/services";
 
   // populated from the JSON files before render() runs
-  var S = [], SC = [], R = [], P = [], T = [], PK = [], FAQ = [], GBA = [], GAL = [], HOME = {}, SITE = {};
+  var S = [], SC = [], R = [], P = [], T = [], PK = [], FAQ = [], GBA = [], GAL = [], HOME = {}, SITE = {}, ABOUT = {};
 
   // Markdown -> HTML (from js/md.js); falls back to raw text if not loaded.
   function md(s) { return window.PSE_md ? window.PSE_md(s) : (s || ''); }
@@ -80,6 +80,21 @@
     });
   }
 
+  // Drop an uploaded photo into a placeholder box (replaces the .img-ph art).
+  function setImg(el, v) {
+    if (!v) return;
+    el.innerHTML = '<img loading="lazy" decoding="async" src="' + v + '" alt="' + (el.getAttribute('data-alt') || '') + '">';
+    el.classList.remove('img-ph');
+  }
+  // Set a photo as a CSS background (used by the before/after slider panes).
+  function setBg(el, v) {
+    if (!v) return;
+    el.style.backgroundImage = 'url("' + v + '")';
+    el.style.backgroundSize = 'cover';
+    el.style.backgroundPosition = 'center';
+    var ph = el.querySelector('.ba-ph'); if (ph) ph.style.display = 'none';
+  }
+
   function applyHome(H) {
     if (!H) return;
     bind(H, 'data-h', function (el, v) { el.textContent = v; });
@@ -89,6 +104,14 @@
       if (el.hasAttribute('data-lead')) html = html.replace(/^<p>/, '<p class="lead">');
       el.innerHTML = html;
     });
+    bind(H, 'data-h-img', setImg);
+    bind(H, 'data-h-bg', setBg);
+  }
+
+  function applyAbout(A) {
+    if (!A) return;
+    bind(A, 'data-a', function (el, v) { el.textContent = v; });
+    bind(A, 'data-a-img', setImg);
   }
 
   function applySite(SITE) {
@@ -117,6 +140,7 @@
     /* ---- HOME page copy + shared footer/business info ---- */
     applyHome(HOME);
     applySite(SITE);
+    applyAbout(ABOUT);
 
     /* ---- HOME: featured services (up to 4) ---- */
     var featSvc = S.filter(function (s) { return s.featured; });
@@ -282,7 +306,8 @@
     getJSON('content/faq.json').catch(function () { return {}; }),
     getJSON('content/gallery.json').catch(function () { return {}; }),
     getJSON('content/home.json').catch(function () { return {}; }),
-    getJSON('content/site.json').catch(function () { return {}; })
+    getJSON('content/site.json').catch(function () { return {}; }),
+    getJSON('content/about.json').catch(function () { return {}; })
   ]).then(function (res) {
     var sv = res[0] || {}; SC = sv.categories || []; S = sv.services || [];
     R = (res[1] || {}).reviews || [];
@@ -293,6 +318,7 @@
     var g = res[6] || {}; GBA = g.beforeAfter || []; GAL = g.gallery || [];
     HOME = res[7] || {};
     SITE = res[8] || {};
+    ABOUT = res[9] || {};
     try { render(); } catch (e) { if (window.console) console.error('content render failed', e); }
     ready();
   });

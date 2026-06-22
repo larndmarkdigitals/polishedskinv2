@@ -9,7 +9,8 @@
     "trustLine": "4.9 from 64 reviews on Google",
     "badgeRating": "4.9★",
     "badgeReviews": "64 Google reviews",
-    "badgeNote": "Licensed & insured"
+    "badgeNote": "Licensed & insured",
+    "img": ""
   },
   "trustStrip": [
     { "top": "4.9 / 5.0", "sub": "64 Google reviews" },
@@ -42,7 +43,9 @@
     "headingAccent": "Personalized for your goals.",
     "body": "Beautiful skin starts with healthy skin.\n\nAt Polished Skin, we help clients throughout Eugene, Oregon improve skin texture, firmness, hydration, tone, redness, and overall skin health through personalized treatment plans designed around their unique concerns and goals.\n\nWhether you're looking for age management treatments, rosacea care, hyperpigmentation correction, acne support, skin barrier repair, or advanced corrective skincare, every treatment is customized to help your skin become healthier, stronger, and more resilient over time.\n\nUsing advanced treatments including **Glo2Facial®, BioRePeel®, Jet Plasma®, and ProCell Microchanneling®**, we focus on improving skin function — not just creating temporary changes. The results speak for themselves.\n\n**Drag the slider to compare real client before-and-after results.**\n\nWhat makes these transformations possible isn't a quick fix or a single treatment. It's a personalized approach, professional guidance, and a treatment plan designed specifically for your skin.\n\nAs a trusted Eugene esthetician specializing in age management and corrective skincare, our goal is simple: help your skin look better by helping it function better.\n\n**Healthy skin ages better.** That's the foundation of everything we do.",
     "galleryButton": "View Real Client Results",
-    "bookButton": "Book Your Consultation"
+    "bookButton": "Book Your Consultation",
+    "beforeImg": "",
+    "afterImg": ""
   },
   "about": {
     "eyebrow": "About The Clinic",
@@ -51,7 +54,8 @@
     "headingSuffix": "",
     "body": "At Polished Skin, we believe healthy skin ages better.\n\nFounded by licensed esthetician **Analisa Hickey**, Polished Skin is a results-driven skincare studio in **Eugene, Oregon** specializing in **age management, corrective skincare, rosacea treatment, hyperpigmentation correction, acne support, and skin barrier restoration**.\n\nEvery treatment begins with understanding your skin, your concerns, and your goals. Whether you're looking to improve fine lines, wrinkles, redness, pigmentation, dehydration, acne, or overall skin health, your treatment plan is customized specifically for you.\n\nUsing advanced treatments including **Glo2Facial®, BioRePeel®, Jet Plasma®, ProCell Microchanneling®, and customized corrective facials**, we help improve skin function, stimulate collagen production, strengthen the skin barrier, and create visible results that continue to improve over time.\n\nUnlike one-size-fits-all skincare, our approach combines professional expertise, advanced technology, and personalized care to help you achieve healthier, stronger, more radiant skin with confidence.\n\nAs a trusted Eugene esthetician, our mission is simple: **help your skin look better by helping it function better.**\n\n**Healthy skin isn't created by quick fixes.** It's created through consistency, customization, and treatments that work with your skin, not against it.",
     "chips": ["Licensed Esthetician", "ProCell Certified", "4.9★ Rated"],
-    "button": "Meet Your Esthetician"
+    "button": "Meet Your Esthetician",
+    "img": ""
   },
   "reviewsSection": {
     "eyebrow": "Kind Words",
