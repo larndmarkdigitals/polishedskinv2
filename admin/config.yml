@@ -17,7 +17,7 @@
 
 backend:
   name: github
-  repo: OWNER/REPO        # TODO: set to the real GitHub repo before going live
+  repo: larndmarkdigitals/polishedskinv2
   branch: main
 
 # Lets you edit local files in the browser without GitHub (see notes above).
