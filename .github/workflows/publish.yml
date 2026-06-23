@@ -1,0 +1,28 @@
+name: Publish to website
+
+# One-click publish.
+#
+# The CMS commits every "Save" to `main`, but Netlify deploys the `live`
+# branch — so saves pile up on `main` without ever deploying (no credits used).
+# Running this workflow fast-forwards `live` up to `main`, which triggers a
+# single Netlify deploy containing every pending change.
+#
+# To publish: repo → Actions tab → "Publish to website" → Run workflow.
+
+on:
+  workflow_dispatch:
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Move live up to main (triggers one Netlify deploy)
+        run: git push origin HEAD:live
