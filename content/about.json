@@ -1,3 +1,33 @@
 {
-  "clinicPhoto": ""
+  "clinicPhoto": "",
+  "hero": {
+    "heading": "About",
+    "headingAccent": "Polished Skin",
+    "sub": "Age management and corrective skin care in the heart of Eugene."
+  },
+  "clinic": {
+    "eyebrow": "Our Clinic",
+    "heading": "A different kind of",
+    "headingAccent": "skincare clinic",
+    "body": "Polished Skin is a Eugene skincare clinic built on one idea: skincare should be unhurried, genuinely personal, and actually effective. We specialize in **age management and corrective skin care** — from relaxing signature facials to advanced, results-driven treatments.\n\nEvery appointment starts with your skin. We take the time to understand your concerns, your history, and your goals, so we can find the right treatment and build a plan made just for you. No rushing, no upsells, no judgment — just expert care in a calm, welcoming space.\n\nOur philosophy is simple: **rebuild your skin, don't break it down.** The treatments we choose work with your skin's own biology to strengthen and renew it — never strip or overwork it.\n\nThe result is healthier, more confident skin you can see, and an experience you'll actually look forward to coming back to."
+  },
+  "expect": {
+    "eyebrow": "The Polished Skin Way",
+    "heading": "What you can expect",
+    "cards": [
+      { "title": "A real consultation", "text": "We start by understanding your skin and goals — so your treatment is built for you, not a template." },
+      { "title": "A calm experience", "text": "A clean, welcoming clinic where you can fully relax. No rush, no pressure — just expert care." },
+      { "title": "Results you'll see", "text": "Honest advice and effective treatments that leave your skin healthier every single visit." }
+    ]
+  },
+  "esthetician": {
+    "eyebrow": "The Esthetician",
+    "heading": "Behind the clinic",
+    "bio": "Polished Skin is led by **Analisa**, a licensed, ProCell-certified esthetician who pairs advanced, results-driven treatments with a genuine understanding of how skin works. Her goal for every client is simple: leave glowing, confident, and excited to come back."
+  },
+  "cta": {
+    "heading": "Let's get you",
+    "headingAccent": "glowing",
+    "sub": "Book your first appointment — we can't wait to meet you."
+  }
 }
