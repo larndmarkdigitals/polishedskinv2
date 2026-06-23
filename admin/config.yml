@@ -181,9 +181,56 @@ collections:
       - name: about
         label: "About Page"
         file: "content/about.json"
-        description: "Photo on the About page."
+        description: "Everything on the About page."
         fields:
           - { name: clinicPhoto, label: "Clinic photo (portrait ~4:5)", widget: image, required: false, choose_url: false }
+          - name: hero
+            label: "Page header"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: sub, label: "Subtitle", widget: string }
+          - name: clinic
+            label: "The clinic (main section)"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: body, label: "Paragraphs", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
+          - name: expect
+            label: "What you can expect"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - name: cards
+                label: "Cards (3)"
+                widget: list
+                summary: "{{fields.title}}"
+                fields:
+                  - { name: title, label: "Title", widget: string }
+                  - { name: text, label: "Text", widget: text }
+          - name: esthetician
+            label: "The esthetician"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: eyebrow, label: "Eyebrow", widget: string }
+              - { name: heading, label: "Heading", widget: string }
+              - { name: bio, label: "Bio", widget: markdown, buttons: [bold, italic, link], editor_components: [] }
+          - name: cta
+            label: "Bottom call-to-action"
+            widget: object
+            collapsed: true
+            fields:
+              - { name: heading, label: "Heading", widget: string }
+              - { name: headingAccent, label: "Heading — script accent", widget: string }
+              - { name: sub, label: "Subtitle", widget: string }
 
       # ---- Site & Footer (every page) ---------------------------------------
       - name: site
