@@ -111,6 +111,7 @@
   function applyAbout(A) {
     if (!A) return;
     bind(A, 'data-a', function (el, v) { el.textContent = v; });
+    bind(A, 'data-a-md', function (el, v) { el.innerHTML = md(v); });
     bind(A, 'data-a-img', setImg);
   }
 
