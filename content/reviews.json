@@ -1,55 +1,65 @@
 {
   "reviews": [
     {
-      "name": "Sarah M.",
-      "service": "Signature Glo2Facial",
-      "text": "I've been to a lot of estheticians and no one compares. So thoughtful, skilled, and genuinely invested in your skin. I leave every appointment glowing — and so relaxed.",
+      "name": "Jeannine Emery",
+      "service": "Signature Facial",
+      "text": "Amazing facial experience at Polished Skin in Eugene. The atmosphere was clean and relaxing. Analisa is the owner and esthetician — she's very knowledgeable and takes the time to understand my skin concerns before starting. The facial was designed specifically for my skin, and it left me feeling amazingly clean, fresh, and hydrated. I will definitely be back.",
       "featured": true
     },
     {
-      "name": "Jessica R.",
-      "service": "Deluxe Facial",
-      "text": "Best skincare experience I've had, hands down. They actually listen and tailor everything to your skin. Glowing for days after."
+      "name": "Margie Van Dorn",
+      "service": "Age Management",
+      "text": "Annie is amazing! My skin looks and feels like it did in my 20's and I'm approaching 60! She's hilarious and makes the time spent with her enjoyable. I would give her more stars if I could."
     },
     {
-      "name": "Megan T.",
-      "service": "ProCell Microchanneling",
-      "text": "The microchanneling results are unreal. My texture and fine lines have visibly improved after just a couple sessions. Worth every penny."
+      "name": "Rachel Sullivan",
+      "service": "Deluxe Glo2Facial",
+      "text": "Absolutely the most relaxed facial experience I have ever received. Annie did the Deluxe Glo2Facial on me and I have never seen or felt my skin so smooth and radiant. I'm getting married this Saturday and this was the perfect facial beforehand. 10/10 would recommend!"
     },
     {
-      "name": "Ashley P.",
-      "service": "Glo2Facial",
-      "text": "Clean, calming space and you can tell they truly know skin. I've already booked my next three appointments. Highly recommend."
+      "name": "Wendy Westcott",
+      "service": "Facials & Brow Waxing",
+      "text": "Before I met Annie, I hadn't ever had a facial, and I'm 54! Annie is an expert, and her experience shows. I started slow with a basic facial and graduated to more advanced treatments. She even does eyebrow waxing! I highly recommend Annie for older clients looking to keep their skin healthy."
     },
     {
-      "name": "Kayla B.",
-      "service": "Dermaplaning Facial",
-      "text": "My dermaplaning facial left my skin so smooth my makeup went on flawlessly for a week. This is my new go-to in Eugene."
+      "name": "Keah Taylor",
+      "service": "Age Management",
+      "text": "Annie is wonderful. My skin already looks and feels so much better. At 55 I didn't think there was much I could do without plastic surgery. She's showing me there are so many other options and reasonably priced products that really make a difference. Very knowledgeable and an overall positive person."
     },
     {
-      "name": "Nicole D.",
-      "service": "Glowing Facial",
-      "text": "I came in with breakouts and so much frustration. They built a real plan for me and my skin has completely turned around."
+      "name": "Annaliesa Mehler",
+      "service": "Custom Skincare",
+      "text": "Annie is a wonderful person to work with. For nearly two years she took great care of my skin for a fair price and recommended sound products. She's very professional and only recommends what's necessary and beneficial — she has the client's interest at heart. 11/10 for her practice!"
     },
     {
-      "name": "Rachel S.",
-      "service": "Deluxe Facial",
-      "text": "Professional, knowledgeable, and so warm. Everything is explained as it happens and why. I always leave feeling cared for."
+      "name": "Emily Keene",
+      "service": "Signature Facial",
+      "text": "Analisa is awesome! Very knowledgeable and friendly. I always leave feeling like my skin is glowing. Highly recommend!"
     },
     {
-      "name": "Emily H.",
-      "service": "Signature Glo2Facial",
-      "text": "The Glo2Facial is magic. Instant glow with zero downtime — I booked it before a wedding and got compliments all night."
+      "name": "Cris Diaz",
+      "service": "New Client Facial",
+      "text": "This was my first facial ever! Very happy with the experience. I will definitely be returning — my skin feels so hydrated. Thank you Analisa!"
     },
     {
-      "name": "Taylor W.",
-      "service": "Glowing Facial",
-      "text": "Hands down the best facial in Eugene. The space is gorgeous, it's relaxing, and the results actually last. Can't recommend enough."
+      "name": "Sonia Castaneda",
+      "service": "Facials & Waxing",
+      "text": "Always provides great quality service! I love the facials and wax treatments. Definitely recommend her!"
     },
     {
-      "name": "Brianna L.",
-      "service": "Microneedling",
-      "text": "Microneedling here was a game changer for my acne scarring. Gentle, professional, and the results speak for themselves."
+      "name": "Kari Linton",
+      "service": "Signature Facial",
+      "text": "Annie is the best! Professional, clean, quick, and funny. Makes you comfortable and she isn't pushy!"
+    },
+    {
+      "name": "Lauren Winder Hoar",
+      "service": "Custom Facial",
+      "text": "Annie always does a great job on my skin! Love the products she uses too."
+    },
+    {
+      "name": "Alexis Alatorre",
+      "service": "Signature Facial",
+      "text": "Such an amazing facial! Very relaxing and my skin felt so good after."
     }
   ]
 }
