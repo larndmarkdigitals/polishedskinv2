@@ -200,7 +200,19 @@
     if (a && !a.closest('.oe-ui')) e.preventDefault();
   }, true);
 
+  // The Edit button is hidden from normal visitors. It only appears when edit
+  // mode is requested by visiting the page with "#edit" (bookmark it that way).
+  // Once seen in a tab it stays on for that session, so navigating won't lose it.
+  function editModeRequested() {
+    if ((location.hash || '').toLowerCase() === '#edit') {
+      try { sessionStorage.setItem('pse-onpage-enabled', '1'); } catch (e) {}
+      return true;
+    }
+    try { return sessionStorage.getItem('pse-onpage-enabled') === '1'; } catch (e) { return false; }
+  }
+  function reveal() { if (editModeRequested()) launch.hidden = false; }
+
   // Enable only once content.js has filled the bindings.
-  if (window.PSE_CONTENT_READY) launch.hidden = false;
-  else document.addEventListener('pse:loaded', function () { launch.hidden = false; });
+  if (window.PSE_CONTENT_READY) reveal();
+  else document.addEventListener('pse:loaded', reveal);
 })();
