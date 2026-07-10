@@ -1,356 +1,206 @@
 /* ============================================================
-   editor.js — in-browser inline editor for Polished Skin.
-   Click "Edit" (top right) → click any text to type, or click any
-   photo area to upload an image → "Save changes".
+   editor.js — on-page editor for the Polished Skin HOME page.
 
-   Edits are saved in THIS browser only (localStorage) as a live draft —
-   they do NOT rewrite the site files or publish to other visitors. For
-   permanent changes, edit the content/*.js files and add real photos to img/.
+   Click "Edit" → click any text → "Save to site". Saving batches every
+   change and POSTs it to /.netlify/functions/save, which commits the
+   updated content/*.json files to the repo's main branch. (main is the
+   draft branch — publish main -> live to deploy.)
 
-   NOTE: edits are keyed to each element's ORIGINAL text (content-addressed),
-   not its position — so adding/reordering sections won't scramble saved edits.
+   It knows which JSON field an element maps to by reading the SAME
+   binding attributes content.js already renders from:
+       data-h="hero.title"   -> home.json  hero.title
+       data-h-para="…"        -> home.json  (multi-line)
+       data-s="business.name" -> site.json  business.name
+   Markdown fields (data-h-md), images (data-h-img/bg) and the composite
+   footer blocks (data-s-*) are intentionally NOT touched here — those
+   stay in the Sveltia CMS at /admin.
+
+   No credential lives here. The GitHub token is only in the serverless
+   function's environment; the browser just sends a password.
+
+   Currently loaded on index.html only (home-page pilot).
    ============================================================ */
 (function () {
-  var PAGE = (location.pathname.split('/').pop() || 'index.html').toLowerCase();
-  var TKEY = 'pse-edit-v2:' + PAGE;   // text overrides (v2 = content-addressed)
-  var IKEY = 'pse-img-v2:' + PAGE;    // image overrides
-
-  /* ---- Web3Forms config -----------------------------------------------
-     "Send to developer" emails the edits straight to the developer's inbox
-     via Web3Forms (web3forms.com) — the same service the EV Works site uses.
-     Paste your Web3Forms ACCESS KEY below (from your web3forms.com dashboard;
-     it's the same key per inbox, so you can reuse the one from EV Works).
-     Until it's filled in, the button safely falls back to downloading a
-     .txt file the client can email manually.                              */
-  var WEB3FORMS_KEY = '844ac78c-8186-4b9f-9d0c-9e23bff589c6';
-
-  function emailConfigured() { return WEB3FORMS_KEY.indexOf('YOUR_') !== 0; }
-
-  var TEXT_SEL = [
-    'h1', 'h2', 'h3', 'h4', '.eyebrow', '.pill', 'blockquote', 'p', 'li',
-    '.btn', '.foot-h', '.cat-sub', '.sci-step h4', '.mr-name', '.mr-desc',
-    '.post-tag', '.svc-link', '.tst-by .n', '.tst-by .svc', '.by', '.foot-contact',
-    '.faq-q span', '.pkg-tag', '.pkg-desc'
-  ].join(',');
-  var IMG_SEL = '.hero-photo, .about-img, .svc-img, .post-img, .ba-img, .bap-photo, .gal-photo';
+  var SAVE_URL = '/.netlify/functions/save';
+  var DRAFT_KEY = 'pse-onpage-draft';
+  var PW_KEY = 'pse-onpage-pw';
 
   var editing = false;
-  var origText = {};
-  var pendingImg = {};
-  var imgData = loadJSON(IKEY);
+  var orig = {};                              // field key -> last saved/loaded value
 
-  // one-time cleanup of the old position-keyed data that caused jumbling
-  try { localStorage.removeItem('pse-edits:' + PAGE); localStorage.removeItem('pse-imgs:' + PAGE); } catch (e) {}
-
-  function loadJSON(k) { try { return JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { return {}; } }
-  function textEls() {
-    return Array.prototype.slice.call(document.querySelectorAll(TEXT_SEL))
-      .filter(function (el) { return !el.closest('.pse-ui'); });
+  // Map an element to { key, multi } using its binding attribute, or null.
+  function info(el) {
+    if (el.hasAttribute('data-h-para')) return { key: 'home.' + el.getAttribute('data-h-para'), multi: true };
+    if (el.hasAttribute('data-h'))      return { key: 'home.' + el.getAttribute('data-h'),      multi: false };
+    if (el.hasAttribute('data-s'))      return { key: 'site.' + el.getAttribute('data-s'),      multi: false };
+    return null;
   }
-  function imgSlots() {
-    return Array.prototype.slice.call(document.querySelectorAll(IMG_SEL))
-      .filter(function (el) { return !el.closest('.pse-ui'); });
+  function fields() {
+    return Array.prototype.slice.call(document.querySelectorAll('[data-h],[data-h-para],[data-s]'))
+      .filter(function (el) { return !el.closest('.oe-ui'); });
   }
-
-  // small stable hash of an element's source content
-  function hash(str) { var h = 5381, i = str.length; while (i) { h = (h * 33) ^ str.charCodeAt(--i); } return (h >>> 0).toString(36); }
-  function sigOf(el) { return el.tagName.toLowerCase() + ':' + hash((el.innerHTML || '').replace(/\s+/g, ' ').trim()); }
-
-  // assign each editable element a content key (run BEFORE overrides are applied)
-  function assignKeys() {
-    var counts = {};
-    textEls().forEach(function (el) {
-      var base = sigOf(el);
-      var n = counts[base] = (counts[base] || 0) + 1;
-      var key = base + '#' + n;
-      el.setAttribute('data-ec-key', key);
-      origText[key] = el.innerHTML;
-    });
+  function readEl(el, multi) {
+    return multi ? el.innerText.replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '')
+                 : (el.textContent || '').trim();
   }
+  function writeEl(el, v, multi) { if (multi) el.innerText = v; else el.textContent = v; }
 
-  function applyText() {
-    assignKeys();
-    var data = loadJSON(TKEY);
-    textEls().forEach(function (el) {
-      var k = el.getAttribute('data-ec-key');
-      if (k && data[k] != null) el.innerHTML = data[k];
-    });
-  }
-  function applyImages() {
-    var slots = imgSlots();
-    Object.keys(imgData).forEach(function (k) { var i = +k; if (slots[i]) setPhoto(slots[i], imgData[i]); });
-  }
-  function setPhoto(el, url) {
-    var inner = el.querySelector('img');
-    if (inner) { inner.src = url; }
-    else {
-      el.style.backgroundImage = 'url("' + url + '")';
-      el.style.backgroundSize = 'cover';
-      el.style.backgroundPosition = 'center';
-    }
-    el.classList.add('pse-has-photo');
-  }
+  /* ---------- styles ---------- */
+  var css = [
+    '.oe-launch{position:fixed;right:20px;bottom:20px;z-index:9998;display:inline-flex;align-items:center;gap:8px;',
+    'background:#16201f;color:#fff;border:none;border-radius:100px;padding:12px 20px;font:600 14px/1 Jost,system-ui,sans-serif;',
+    'cursor:pointer;box-shadow:0 10px 26px rgba(20,40,38,.28);transition:.16s;}',
+    '.oe-launch:hover{background:#268b82;transform:translateY(-2px);}',
+    '.oe-launch[hidden],.oe-bar[hidden]{display:none!important;}',
+    '.oe-bar{position:fixed;left:0;right:0;bottom:0;z-index:9999;background:#16201f;color:#fff;',
+    'display:flex;align-items:center;gap:12px;padding:12px 18px;box-shadow:0 -6px 22px rgba(0,0,0,.18);font:14px Jost,system-ui,sans-serif;}',
+    '.oe-bar .hint{margin-right:auto;color:#bfe9e4;display:flex;align-items:center;gap:9px;}',
+    '.oe-bar .dot{width:8px;height:8px;border-radius:50%;background:#34b3a8;animation:oepulse 1.4s infinite;}',
+    '@keyframes oepulse{0%,100%{opacity:1}50%{opacity:.3}}',
+    '.oe-b{border:none;border-radius:8px;padding:10px 16px;font:600 13.5px Jost,system-ui,sans-serif;cursor:pointer;transition:.15s;}',
+    '.oe-save{background:#34b3a8;color:#fff;}.oe-save:hover{background:#2aa093;}.oe-save[disabled]{opacity:.5;cursor:default;}',
+    '.oe-ghost{background:transparent;color:#cdddda;border:1px solid rgba(255,255,255,.28);}',
+    '.oe-ghost:hover{background:rgba(255,255,255,.1);}',
+    'body.oe-on [data-h],body.oe-on [data-h-para],body.oe-on [data-s]{outline:1.5px dashed rgba(52,179,168,.6);outline-offset:3px;border-radius:3px;cursor:text;transition:outline-color .15s,background .15s;}',
+    'body.oe-on [data-h]:hover,body.oe-on [data-h-para]:hover,body.oe-on [data-s]:hover{outline-color:#34b3a8;background:rgba(52,179,168,.08);}',
+    'body.oe-on [data-h]:focus,body.oe-on [data-h-para]:focus,body.oe-on [data-s]:focus{outline:2px solid #34b3a8;background:rgba(52,179,168,.12);}',
+    'body.oe-on .oe-changed{outline-color:#3a7d4a!important;background:rgba(58,125,74,.09)!important;}',
+    '.oe-toast{position:fixed;left:50%;bottom:76px;transform:translateX(-50%) translateY(16px);z-index:10000;',
+    'background:#16201f;color:#fff;padding:12px 20px;border-radius:100px;font:14px Jost,system-ui,sans-serif;',
+    'opacity:0;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.25);max-width:90vw;text-align:center;}',
+    '.oe-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}'
+  ].join('');
+  var st = document.createElement('style'); st.textContent = css; document.head.appendChild(st);
 
-  /* ---- styles ---- */
-  var css = ''
-    + '.pse-launch[hidden],.pse-bar[hidden]{display:none!important;}'
-    + '.pse-launch{position:fixed;top:92px;right:20px;z-index:9999;display:inline-flex;align-items:center;gap:7px;'
-    + 'background:#16201f;color:#fff;border:none;border-radius:100px;padding:10px 16px;font-size:13.5px;'
-    + 'font-family:Jost,system-ui,sans-serif;cursor:pointer;box-shadow:0 8px 22px rgba(20,40,38,.22);transition:.18s;}'
-    + '.pse-launch:hover{background:#268b82;transform:translateY(-1px);}'
-    + '.pse-bar{position:fixed;top:0;left:0;right:0;z-index:10000;background:#16201f;color:#fff;'
-    + 'display:flex;align-items:center;gap:14px;padding:12px 22px;box-shadow:0 6px 20px rgba(0,0,0,.18);}'
-    + '.pse-bar .pse-hint{font-size:14px;color:#bfe9e4;margin-right:auto;display:flex;align-items:center;gap:8px;}'
-    + '.pse-bar .pse-dot{width:8px;height:8px;border-radius:50%;background:#34b3a8;animation:psepulse 1.4s infinite;}'
-    + '@keyframes psepulse{0%,100%{opacity:1}50%{opacity:.35}}'
-    + '.pse-b{border:none;border-radius:8px;padding:10px 18px;font-size:13.5px;font-family:Jost,system-ui,sans-serif;cursor:pointer;transition:.15s;}'
-    + '.pse-save{background:#34b3a8;color:#fff;}.pse-save:hover{background:#2aa093;}'
-    + '.pse-ghost{background:transparent;color:#cdddda;border:1px solid rgba(255,255,255,.25);}'
-    + '.pse-ghost:hover{background:rgba(255,255,255,.08);}'
-    + 'body.pse-editing .pse-editable{outline:1.5px dashed rgba(52,179,168,.55);outline-offset:3px;border-radius:3px;transition:outline-color .15s,background .15s;}'
-    + 'body.pse-editing .pse-editable:hover{outline-color:#34b3a8;background:rgba(52,179,168,.07);}'
-    + 'body.pse-editing .pse-editable:focus{outline:2px solid #34b3a8;background:rgba(52,179,168,.10);}'
-    + '.pse-photo-slot{position:relative;cursor:pointer;}'
-    + '.pse-photo-cta{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;'
-    + 'background:rgba(22,32,31,.48);color:#fff;font-family:Jost,system-ui,sans-serif;font-size:14px;opacity:0;transition:.18s;z-index:6;border-radius:inherit;}'
-    + '.pse-photo-slot:hover .pse-photo-cta{opacity:1;}'
-    + '.pse-photo-cta svg{width:24px;height:24px;}'
-    + '.pse-has-photo>svg,.pse-has-photo .ph-label,.pse-has-photo .ba-ph{display:none!important;}'
-    + '.pse-has-photo{background-image:none;}'
-    + '.pse-toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(20px);z-index:10001;'
-    + 'background:#16201f;color:#fff;padding:12px 22px;border-radius:100px;font-size:14px;font-family:Jost,system-ui,sans-serif;'
-    + 'opacity:0;transition:.3s;box-shadow:0 10px 30px rgba(0,0,0,.25);}'
-    + '.pse-toast.show{opacity:1;transform:translateX(-50%) translateY(0);}'
-    + '@media(max-width:760px){.pse-launch{top:auto;bottom:18px;right:18px;}.pse-bar{flex-wrap:wrap;gap:8px;}.pse-bar .pse-hint{width:100%;margin:0;}}';
-  var style = document.createElement('style'); style.textContent = css; document.head.appendChild(style);
-
-  /* ---- UI ---- */
+  /* ---------- UI ---------- */
   var launch = document.createElement('button');
-  launch.className = 'pse-launch';
-  launch.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg> Edit';
+  launch.className = 'oe-ui oe-launch'; launch.hidden = true;
+  launch.innerHTML = '✏️ Edit this page';
   document.body.appendChild(launch);
 
   var bar = document.createElement('div');
-  bar.className = 'pse-ui pse-bar'; bar.hidden = true;
+  bar.className = 'oe-ui oe-bar'; bar.hidden = true;
   bar.innerHTML =
-      '<span class="pse-hint"><span class="pse-dot"></span>Click any text to edit it, or any photo to upload, then Save.</span>'
-    + '<button class="pse-b pse-save">Save changes</button>'
-    + '<button class="pse-b pse-ghost pse-cancel">Cancel</button>'
-    + '<button class="pse-b pse-ghost pse-revert">Revert to original</button>'
-    + '<button class="pse-b pse-ghost pse-export">Send changes to developer</button>';
+    '<span class="hint"><span class="dot"></span>Click any text to edit it, then Save.</span>' +
+    '<button class="oe-b oe-save" disabled>Save to site</button>' +
+    '<button class="oe-b oe-ghost oe-discard">Discard changes</button>' +
+    '<button class="oe-b oe-ghost oe-exit">Done</button>';
   document.body.appendChild(bar);
 
-  var saveBtn = bar.querySelector('.pse-save');
-  var cancelBtn = bar.querySelector('.pse-cancel');
-  var revertBtn = bar.querySelector('.pse-revert');
-  var exportBtn = bar.querySelector('.pse-export');
-  var PHOTO_CTA = '<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.7"><path d="M3 8a2 2 0 012-2h2l1.5-2h7L18 6h1a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.2"/></svg><span>Click to upload photo</span>';
+  var saveBtn = bar.querySelector('.oe-save');
+  var discardBtn = bar.querySelector('.oe-discard');
+  var exitBtn = bar.querySelector('.oe-exit');
 
+  /* ---------- draft persistence ---------- */
+  function loadDraft() { try { return JSON.parse(localStorage.getItem(DRAFT_KEY) || '{}'); } catch (e) { return {}; } }
+  function saveDraft(d) { try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); } catch (e) {} }
+  function clearDraft() { try { localStorage.removeItem(DRAFT_KEY); } catch (e) {} }
+
+  function changed() {
+    var out = {};
+    fields().forEach(function (el) {
+      var f = info(el); if (!f) return;
+      var v = readEl(el, f.multi);
+      var isChanged = v !== orig[f.key];
+      el.classList.toggle('oe-changed', isChanged);
+      if (isChanged) out[f.key] = v;
+    });
+    return out;
+  }
+  function refresh() {
+    var diff = changed();
+    var n = Object.keys(diff).length;
+    saveBtn.disabled = n === 0;
+    saveBtn.textContent = n ? 'Save to site (' + n + ')' : 'Save to site';
+    if (n) saveDraft(diff); else clearDraft();
+  }
+
+  /* ---------- enter / exit ---------- */
   function enter() {
-    editing = true; pendingImg = {};
-    document.body.classList.add('pse-editing');
-    textEls().forEach(function (el) { el.setAttribute('contenteditable', 'true'); el.spellcheck = true; el.classList.add('pse-editable'); });
-    imgSlots().forEach(function (el, i) {
-      el.classList.add('pse-photo-slot');
-      var cta = document.createElement('div'); cta.className = 'pse-photo-cta'; cta.innerHTML = PHOTO_CTA;
-      cta.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); pickPhoto(i, el); });
-      el.appendChild(cta);
+    editing = true;
+    document.body.classList.add('oe-on');
+    var draft = loadDraft();
+    fields().forEach(function (el) {
+      var f = info(el); if (!f) return;
+      orig[f.key] = readEl(el, f.multi);
+      if (draft[f.key] != null) writeEl(el, draft[f.key], f.multi);
+      el.setAttribute('contenteditable', f.multi ? 'true' : 'plaintext-only');
+      el.addEventListener('input', refresh);
+      if (!f.multi) el.addEventListener('keydown', singleLineKeys);
     });
     launch.hidden = true; bar.hidden = false;
+    refresh();
   }
   function exit() {
     editing = false;
-    document.body.classList.remove('pse-editing');
-    textEls().forEach(function (el) { el.removeAttribute('contenteditable'); el.classList.remove('pse-editable'); });
-    imgSlots().forEach(function (el) { el.classList.remove('pse-photo-slot'); var c = el.querySelector('.pse-photo-cta'); if (c) c.remove(); });
+    document.body.classList.remove('oe-on');
+    fields().forEach(function (el) {
+      el.removeAttribute('contenteditable');
+      el.classList.remove('oe-changed');
+      el.removeEventListener('input', refresh);
+      el.removeEventListener('keydown', singleLineKeys);
+    });
     launch.hidden = false; bar.hidden = true;
   }
+  function singleLineKeys(e) { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } }
 
-  function pickPhoto(i, el) {
-    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-    inp.addEventListener('change', function () {
-      var f = inp.files && inp.files[0]; if (!f) return;
-      resizeImage(f, 1200, 0.78, function (url) { pendingImg[i] = url; setPhoto(el, url); });
-    });
-    inp.click();
-  }
-  function resizeImage(file, max, quality, cb) {
-    var reader = new FileReader();
-    reader.onload = function () {
-      var img = new Image();
-      img.onload = function () {
-        var w = img.width, h = img.height;
-        if (w > max || h > max) { if (w > h) { h = Math.round(h * max / w); w = max; } else { w = Math.round(w * max / h); h = max; } }
-        var c = document.createElement('canvas'); c.width = w; c.height = h;
-        c.getContext('2d').drawImage(img, 0, 0, w, h);
-        try { cb(c.toDataURL('image/jpeg', quality)); } catch (e) { cb(reader.result); }
-      };
-      img.onerror = function () { alert('Sorry, that image could not be loaded.'); };
-      img.src = reader.result;
-    };
-    reader.readAsDataURL(file);
-  }
+  /* ---------- save ---------- */
+  function save() {
+    var diff = changed();
+    if (!Object.keys(diff).length) { toast('No changes yet — click some text to edit.'); return; }
 
-  function doSave() {
-    // Merge over what's already stored — never replace the whole object.
-    // If a page's HTML changed in a later deploy, its content-hash keys won't
-    // match, but we must keep any previously-saved edits rather than drop them.
-    var t = loadJSON(TKEY);
-    textEls().forEach(function (el) { var k = el.getAttribute('data-ec-key'); if (k) t[k] = el.innerHTML; });
-    Object.keys(pendingImg).forEach(function (k) { imgData[k] = pendingImg[k]; });
-    try {
-      localStorage.setItem(TKEY, JSON.stringify(t));
-      localStorage.setItem(IKEY, JSON.stringify(imgData));
-      exit(); toast('Changes saved ✓');
-    } catch (e) { toast('Photos too large to save in-browser — use smaller images, or add them to the img folder.'); }
-  }
+    var pw = sessionStorage.getItem(PW_KEY) || window.prompt('Enter the edit password to publish:');
+    if (!pw) return;
+    sessionStorage.setItem(PW_KEY, pw);
 
-  // Drop this browser's saved drafts for the current page so it renders
-  // straight from the published site files again (the "original"). Handy for
-  // checking how the live copy actually looks once edits have been applied to
-  // the real files. Only clears THIS page's local edits — never the files.
-  function doRevert() {
-    if (!confirm('Revert ' + PAGE + ' to the original published copy?\n\n'
-      + 'This clears the text and photo edits saved in THIS browser for this page '
-      + 'and reloads. It does not change the website files, and cannot be undone.')) return;
-    try {
-      localStorage.removeItem(TKEY);
-      localStorage.removeItem(IKEY);
-    } catch (e) {}
-    location.reload();
-  }
-
-  // Collect every uploaded photo from this browser: [{page, slot, url}, ...]
-  function gatherImages() {
-    var out = [];
-    for (var j = 0; j < localStorage.length; j++) {
-      var ik = localStorage.key(j);
-      if (ik.indexOf('pse-img-v2:') !== 0) continue;
-      var page = ik.slice('pse-img-v2:'.length);
-      var data; try { data = JSON.parse(localStorage.getItem(ik) || '{}'); } catch (e) { continue; }
-      Object.keys(data).forEach(function (slot) { out.push({ page: page, slot: slot, url: data[slot] }); });
-    }
-    return out;
-  }
-
-  // includeImageData: when true, embeds the full photo data URLs in the report
-  // (so they arrive by email). When false, just notes that photos exist.
-  function buildReport(includeImageData) {
-    var lines = ['Polished Skin - content edits', 'Generated ' + new Date().toLocaleString(), '',
-      'HOW TO USE: in the website files, find each OLD line and replace it with the NEW line.', ''];
-    var prefix = 'pse-edit-v2:';
-    var any = false;
-    for (var i = 0; i < localStorage.length; i++) {
-      var k = localStorage.key(i);
-      if (k.indexOf(prefix) !== 0) continue;
-      var page = k.slice(prefix.length);
-      var data; try { data = JSON.parse(localStorage.getItem(k) || '{}'); } catch (e) { continue; }
-      var ckeys = Object.keys(data);
-      if (!ckeys.length) continue;
-      any = true;
-      lines.push('===== PAGE: ' + page + ' =====', '');
-      ckeys.forEach(function (ck, idx) {
-        var oldT = (page === PAGE && origText[ck] != null) ? origText[ck] : '(open this page to see the original)';
-        lines.push((idx + 1) + '.', 'OLD: ' + oldT, 'NEW: ' + data[ck], '');
-      });
-    }
-    if (!any) lines.push('(No saved text edits found in this browser yet.)');
-
-    var imgs = gatherImages();
-    if (imgs.length) {
-      lines.push('', '===== PHOTOS (' + imgs.length + ') =====', '');
-      if (includeImageData) {
-        imgs.forEach(function (im, idx) {
-          lines.push('PHOTO ' + (idx + 1) + ' — page: ' + im.page + ', slot: ' + im.slot,
-            'Paste this whole data: line into a browser address bar to view/save the image:',
-            'data: ' + im.url, '');
-        });
-      } else {
-        lines.push('(' + imgs.length + ' photo(s) were uploaded but are too large to email automatically —'
-          + ' please ask the client to send the image files separately.)');
-      }
-    }
-    return lines.join('\n');
-  }
-  function download(name, text) {
-    var blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
-    var a = document.createElement('a');
-    a.href = URL.createObjectURL(blob); a.download = name;
-    document.body.appendChild(a); a.click();
-    setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 200);
-  }
-  // Web3Forms rejects very large JSON bodies, so cap how much photo data we
-  // try to email. Below this, photos ride along in the message; above it we
-  // send text-only (reliable) and note the photos must come separately.
-  var MAX_EMAIL_BYTES = 700000;
-
-  function doExport() {
-    // Capture any in-progress typing on THIS page, but MERGE it over what's
-    // already stored so previously-saved edits are never overwritten/reset.
-    if (editing) {
-      var t = loadJSON(TKEY);
-      textEls().forEach(function (el) { var k = el.getAttribute('data-ec-key'); if (k) t[k] = el.innerHTML; });
-      try { localStorage.setItem(TKEY, JSON.stringify(t)); } catch (e) {}
-    }
-
-    var report = buildReport(true);
-    if (report.length > MAX_EMAIL_BYTES) report = buildReport(false); // photos too big — keep email reliable
-
-    // Not configured yet → fall back to downloading a file the client can
-    // email by hand, so the edits are never lost.
-    if (!emailConfigured()) {
-      download('polished-skin-edits.txt', report);
-      toast('Saved a file to your Downloads — email it to your developer');
-      return;
-    }
-
-    var label = exportBtn.textContent;
-    exportBtn.disabled = true; exportBtn.textContent = 'Sending…';
-    fetch('https://api.web3forms.com/submit', {
+    saveBtn.disabled = true; var label = saveBtn.textContent; saveBtn.textContent = 'Saving…';
+    fetch(SAVE_URL, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
-      body: JSON.stringify({
-        access_key: WEB3FORMS_KEY,
-        subject: 'Polished Skin — content edits (' + PAGE + ')',
-        from_name: 'Polished Skin editor',
-        page: PAGE,
-        date: new Date().toLocaleString(),
-        message: report
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: pw, changes: diff })
+    })
+      .then(function (r) { return r.json().then(function (j) { return { status: r.status, ok: r.ok, body: j }; }, function () { return { status: r.status, ok: r.ok, body: {} }; }); })
+      .then(function (res) {
+        if (res.status === 401) { sessionStorage.removeItem(PW_KEY); toast('That password didn’t work — try again.'); return; }
+        if (!res.ok) { toast('Couldn’t save: ' + (res.body.error || ('error ' + res.status))); return; }
+        Object.keys(diff).forEach(function (k) { orig[k] = diff[k]; });
+        clearDraft(); changed();
+        toast('Saved ✓  It commits to the draft (main). Publish to make it live.');
       })
-    }).then(function (res) { return res.json(); }).then(function (data) {
-      if (!data || !data.success) throw new Error('send failed');
-      toast('Sent to your developer ✓');
-    }).catch(function () {
-      // network / credential problem → never lose the edits: download instead
-      download('polished-skin-edits.txt', report);
-      toast('Could not send — saved a file to Downloads instead. Email it to your developer.');
-    }).then(function () {
-      exportBtn.disabled = false; exportBtn.textContent = label;
-    });
+      .catch(function () { toast('Network problem — your edits are kept on this page. Try again.'); })
+      .then(function () { saveBtn.textContent = label; refresh(); });
   }
 
+  /* ---------- toast ---------- */
+  var toastTimer;
   function toast(msg) {
-    var el = document.createElement('div'); el.className = 'pse-toast'; el.textContent = msg;
-    document.body.appendChild(el);
-    requestAnimationFrame(function () { el.classList.add('show'); });
-    setTimeout(function () { el.classList.remove('show'); setTimeout(function () { el.remove(); }, 350); }, 2400);
+    var t = document.querySelector('.oe-toast');
+    if (!t) { t = document.createElement('div'); t.className = 'oe-ui oe-toast'; document.body.appendChild(t); }
+    t.textContent = msg;
+    requestAnimationFrame(function () { t.classList.add('show'); });
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.classList.remove('show'); }, 4200);
   }
 
+  /* ---------- wire up ---------- */
   launch.addEventListener('click', enter);
-  saveBtn.addEventListener('click', doSave);
-  cancelBtn.addEventListener('click', function () { location.reload(); });
-  revertBtn.addEventListener('click', doRevert);
-  exportBtn.addEventListener('click', doExport);
+  saveBtn.addEventListener('click', save);
+  exitBtn.addEventListener('click', function () {
+    if (Object.keys(changed()).length && !window.confirm('You have unsaved edits. Leave edit mode? (They stay as a draft on this device.)')) return;
+    exit();
+  });
+  discardBtn.addEventListener('click', function () {
+    if (!window.confirm('Discard your unsaved edits on this page?')) return;
+    fields().forEach(function (el) { var f = info(el); if (f && orig[f.key] != null) writeEl(el, orig[f.key], f.multi); });
+    clearDraft(); refresh();
+  });
   document.addEventListener('click', function (e) {
     if (!editing) return;
     var a = e.target.closest('a');
-    if (a && !a.closest('.pse-ui')) e.preventDefault();
+    if (a && !a.closest('.oe-ui')) e.preventDefault();
   }, true);
 
-  // Content now renders asynchronously (content.js fetches JSON), so wait for
-  // it before applying saved drafts — otherwise dynamically rendered elements
-  // (service cards, reviews, treatment article…) wouldn't get edit keys.
-  function initOverrides() { applyText(); applyImages(); }
-  if (window.PSE_CONTENT_READY) initOverrides();
-  else document.addEventListener('pse:loaded', initOverrides);
+  // Enable only once content.js has filled the bindings.
+  if (window.PSE_CONTENT_READY) launch.hidden = false;
+  else document.addEventListener('pse:loaded', function () { launch.hidden = false; });
 })();

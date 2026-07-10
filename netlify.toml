@@ -1,0 +1,7 @@
+# Minimal Netlify config — ONLY enables the serverless function used by the
+# on-page editor. Deliberately does NOT set build/publish, so the existing
+# Netlify site settings (publish = repo root, deploy branch = live) are left
+# exactly as they are.
+[functions]
+  directory = "netlify/functions"
+  node_bundler = "esbuild"
