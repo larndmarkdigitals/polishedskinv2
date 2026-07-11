@@ -1,9 +1,11 @@
 /* ============================================================
    save.js — serverless "commit" function for the on-page editor.
 
-   Receives a batch of text edits from the home-page editor and commits
-   the updated content/*.json files to the repo's main branch via the
-   GitHub API. (main is the draft branch; publish main -> live to deploy.)
+   Receives a batch of text edits (possibly spanning several content files
+   and several pages) and commits them ALL in a SINGLE commit to the repo's
+   main branch, via the GitHub Git Data API. One publish = one commit = one
+   deploy. (main is the draft branch — publish main -> live to deploy, or set
+   Netlify to deploy main for save = live.)
 
    The GitHub token NEVER reaches the browser — it lives only here as an
    environment variable. The browser sends a shared password we check.
@@ -69,49 +71,69 @@ exports.handler = async function (event) {
     (byFile[file] = byFile[file] || []).push([path, val]);
   }
 
-  const ghHeaders = {
+  const H = {
     Authorization: 'Bearer ' + GITHUB_TOKEN,
     Accept: 'application/vnd.github+json',
     'User-Agent': 'polished-skin-editor',
     'X-GitHub-Api-Version': '2022-11-28'
   };
-  const contentsUrl = (f) => `${API}/repos/${GITHUB_REPO}/contents/content/${f}.json`;
+  const repo = `${API}/repos/${GITHUB_REPO}`;
 
-  const saved = [];
+  async function gh(url, opts) {
+    const res = await fetch(url, opts);
+    if (!res.ok) {
+      const detail = await res.text().catch(function () { return ''; });
+      const err = new Error('GitHub ' + res.status + ' at ' + url + ': ' + detail.slice(0, 200));
+      err.status = res.status;
+      throw err;
+    }
+    return res.json();
+  }
+
   try {
+    // 1. current tip of the branch + its tree
+    const ref = await gh(`${repo}/git/ref/heads/${encodeURIComponent(BRANCH)}`, { headers: H });
+    const baseSha = ref.object.sha;
+    const baseCommit = await gh(`${repo}/git/commits/${baseSha}`, { headers: H });
+    const baseTree = baseCommit.tree.sha;
+
+    // 2. for each file: read current JSON, apply its edits, upload a new blob
+    const treeItems = [];
+    const saved = [];
     for (const [file, edits] of Object.entries(byFile)) {
-      // 1. read current file (for its content + sha)
-      const getRes = await fetch(`${contentsUrl(file)}?ref=${encodeURIComponent(BRANCH)}`, { headers: ghHeaders });
-      if (!getRes.ok) return json(502, { error: `Could not read content/${file}.json (${getRes.status}).` });
-      const meta = await getRes.json();
+      const meta = await gh(`${repo}/contents/content/${file}.json?ref=${encodeURIComponent(BRANCH)}`, { headers: H });
       let data;
       try { data = JSON.parse(Buffer.from(meta.content, 'base64').toString('utf8')); }
       catch (e) { return json(500, { error: `content/${file}.json is not valid JSON.` }); }
-
-      // 2. apply edits
       for (const [path, val] of edits) setPath(data, path, val);
-
-      // 3. commit updated file
-      const updated = Buffer.from(JSON.stringify(data, null, 2) + '\n', 'utf8').toString('base64');
-      const putRes = await fetch(contentsUrl(file), {
-        method: 'PUT',
-        headers: ghHeaders,
-        body: JSON.stringify({
-          message: `Edit content/${file}.json via on-page editor`,
-          content: updated,
-          sha: meta.sha,
-          branch: BRANCH
-        })
+      const blob = await gh(`${repo}/git/blobs`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ content: JSON.stringify(data, null, 2) + '\n', encoding: 'utf-8' })
       });
-      if (!putRes.ok) {
-        const detail = await putRes.text();
-        return json(502, { error: `Could not save content/${file}.json (${putRes.status}).`, detail: detail.slice(0, 300) });
-      }
+      treeItems.push({ path: `content/${file}.json`, mode: '100644', type: 'blob', sha: blob.sha });
       saved.push(file + '.json');
     }
-  } catch (err) {
-    return json(500, { error: 'Unexpected error: ' + (err && err.message || err) });
-  }
 
-  return json(200, { ok: true, saved });
+    // 3. new tree -> new commit -> move the branch
+    const tree = await gh(`${repo}/git/trees`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({ base_tree: baseTree, tree: treeItems })
+    });
+    const commit = await gh(`${repo}/git/commits`, {
+      method: 'POST', headers: H,
+      body: JSON.stringify({
+        message: 'Edit site content via on-page editor (' + saved.join(', ') + ')',
+        tree: tree.sha,
+        parents: [baseSha]
+      })
+    });
+    await gh(`${repo}/git/refs/heads/${encodeURIComponent(BRANCH)}`, {
+      method: 'PATCH', headers: H,
+      body: JSON.stringify({ sha: commit.sha })
+    });
+
+    return json(200, { ok: true, saved, commit: commit.sha });
+  } catch (err) {
+    return json(502, { error: 'Could not commit: ' + (err && err.message || err) });
+  }
 };

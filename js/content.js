@@ -27,30 +27,38 @@
       : '<div class="' + cls + ' img-ph">' + SPARK + '</div>';
   }
 
+  // data-cms="file.path" marks a field the on-page editor can edit (editor.js
+  // reads it to know which JSON field to write). Index is the item's position
+  // in its source array, so edits map back to the right entry.
   function svcCard(s) {
     // No price on the home page — pricing lives on the Services page only.
+    var i = S.indexOf(s);
     var link = s.link || 'services.html';
     var label = s.link ? 'Learn more →' : 'View details →';
-    var lead = s.tagline ? '<strong>' + s.tagline + '</strong><br>' : '';
+    var lead = s.tagline ? '<strong data-cms="services.services.' + i + '.tagline">' + s.tagline + '</strong><br>' : '';
     return '<div class="svc-card reveal">' + svcImg(s, 'svc-img') +
-      '<div class="svc-body"><h3>' + s.name + '</h3><p>' + lead + (s.blurb || '') + '</p>' +
+      '<div class="svc-body"><h3 data-cms="services.services.' + i + '.name">' + s.name + '</h3>' +
+      '<p>' + lead + '<span data-cms="services.services.' + i + '.blurb">' + (s.blurb || '') + '</span></p>' +
       '<div class="svc-meta"><a href="' + link + '" class="svc-link">' + label + '</a></div></div></div>';
   }
 
   function menuRow(s) {
-    var dur = s.duration ? '<div class="mr-dur">' + s.duration + '</div>' : '';
+    var i = S.indexOf(s);
+    var dur = s.duration ? '<div class="mr-dur" data-cms="services.services.' + i + '.duration">' + s.duration + '</div>' : '';
     var learn = s.link ? '<a class="mr-learn" href="' + s.link + '">Learn more →</a>' : '';
-    return '<div class="menu-row"><div><div class="mr-name">' + s.name + '</div>' +
-      '<div class="mr-desc">' + (s.desc || s.blurb || '') + '</div>' + dur + learn +
-      '</div><div class="mr-price">' + (s.price || 'Inquire') + '</div></div>';
+    return '<div class="menu-row"><div><div class="mr-name" data-cms="services.services.' + i + '.name">' + s.name + '</div>' +
+      '<div class="mr-desc" data-cms="services.services.' + i + '.desc">' + (s.desc || s.blurb || '') + '</div>' + dur + learn +
+      '</div><div class="mr-price" data-cms="services.services.' + i + '.price">' + (s.price || 'Inquire') + '</div></div>';
   }
 
   function revCard(r) {
+    var i = R.indexOf(r);
     var initial = (r.name || '?').trim().charAt(0).toUpperCase();
     return '<div class="tst-card reveal">' + STARS +
-      '<p>"' + r.text + '"</p>' +
+      '<p>"<span data-cms="reviews.reviews.' + i + '.text">' + r.text + '</span>"</p>' +
       '<div class="tst-by"><div class="tst-av">' + initial + '</div>' +
-      '<div><div class="n">' + r.name + '</div><div class="svc">' + (r.service || '') + '</div></div></div></div>';
+      '<div><div class="n" data-cms="reviews.reviews.' + i + '.name">' + r.name + '</div>' +
+      '<div class="svc" data-cms="reviews.reviews.' + i + '.service">' + (r.service || '') + '</div></div></div></div>';
   }
 
   function postCard(p) {
@@ -227,14 +235,16 @@
       set('packages-list', PK.map(pkgCard).join(''));
     }
     function pkgCard(p) {
+      var pi = PK.indexOf(p);
+      var base = 'packages.packages.' + pi + '.';
       var ribbon = p.popular ? '<span class="pkg-ribbon">Most Popular</span>' : '';
-      var inc = (p.includes || []).map(function (i) { return '<li>' + i + '</li>'; }).join('');
+      var inc = (p.includes || []).map(function (item, j) { return '<li data-cms="' + base + 'includes.' + j + '">' + item + '</li>'; }).join('');
       return '<div class="pkg-card reveal' + (p.popular ? ' pkg-pop' : '') + '">' + ribbon +
-        '<h3>' + p.name + '</h3><p class="pkg-tag">' + p.tagline + '</p>' +
-        '<p class="pkg-desc">' + p.desc + '</p>' +
-        '<div class="pkg-for"><span>Best for:</span> ' + p.forWho + '</div>' +
+        '<h3 data-cms="' + base + 'name">' + p.name + '</h3><p class="pkg-tag" data-cms="' + base + 'tagline">' + p.tagline + '</p>' +
+        '<p class="pkg-desc" data-cms="' + base + 'desc">' + p.desc + '</p>' +
+        '<div class="pkg-for"><span>Best for:</span> <span data-cms="' + base + 'forWho">' + p.forWho + '</span></div>' +
         '<ul class="pkg-inc">' + inc + '</ul>' +
-        '<div class="pkg-foot"><span class="pkg-note">' + (p.note || '') + '</span>' +
+        '<div class="pkg-foot"><span class="pkg-note" data-cms="' + base + 'note">' + (p.note || '') + '</span>' +
         '<a class="btn btn-primary" href="' + BOOK + '" target="_blank" rel="noopener">Book</a></div></div>';
     }
 
