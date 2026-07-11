@@ -223,9 +223,10 @@
       var slug = (new URLSearchParams(location.search)).get('slug');
       var post = P.filter(function (p) { return p.slug === slug; })[0] || P[0];
       if (post) {
+        var pb = 'posts.posts.' + P.indexOf(post) + '.';
         document.title = post.title + ' — Polished Skin Eugene';
-        set('post-tag', post.tag);
-        set('post-title', post.title);
+        set('post-tag', post.tag); var _pt = document.getElementById('post-tag'); if (_pt) _pt.setAttribute('data-cms', pb + 'tag');
+        set('post-title', post.title); var _ph = document.getElementById('post-title'); if (_ph) _ph.setAttribute('data-cms', pb + 'title');
         set('post-meta', (post.date ? post.date + ' · ' : '') + (post.readTime || ''));
         var hero = document.getElementById('post-hero-img');
         if (hero) {
@@ -234,6 +235,7 @@
         }
         // keep the larger "lead" styling on the first paragraph
         article.innerHTML = md(post.body).replace(/^<p>/, '<p class="post-lead">');
+        article.setAttribute('data-cms-md', pb + 'body');
       }
     }
 
@@ -289,13 +291,22 @@
         if (t.facts) set('t-facts', factItem('Time', t.facts.duration) + factItem('Downtime', t.facts.downtime) + factItem('Plan', t.facts.series) + factItem('Best for', t.facts.bestFor) + factItem('Suitable for', t.facts.suitableFor));
         var th = document.getElementById('t-hero-img');
         if (th) { th.innerHTML = t.img ? '<img loading="lazy" decoding="async" src="' + t.img + '" alt="' + t.name + '">' : SPARK; if (!t.img) th.classList.add('img-ph'); }
-        var body = String(t.lead || '').split(/\n{2,}/).filter(Boolean)
-          .map(function (p) { return '<p class="post-lead">' + p.replace(/\n/g, '<br>') + '</p>'; }).join('');
-        (t.sections || []).forEach(function (s) { body += '<h2>' + s.h + '</h2>' + md(s.body); });
+        // Stamp the write-up so the on-page editor can edit it: headings/benefits
+        // as plain text (data-cms), the rich passages as Markdown (data-cms-md).
+        var tb = 'treatments.treatments.' + T.indexOf(t) + '.';
+        var body = '<div data-cms-md="' + tb + 'lead">' + md(t.lead || '').replace('<p>', '<p class="post-lead">') + '</div>';
+        (t.sections || []).forEach(function (s, si) {
+          body += '<h2 data-cms="' + tb + 'sections.' + si + '.h">' + s.h + '</h2>' +
+            '<div data-cms-md="' + tb + 'sections.' + si + '.body">' + md(s.body) + '</div>';
+        });
         if (t.benefits && t.benefits.length) {
-          body += '<h2>' + (t.benefitsTitle || 'Benefits') + '</h2><ul class="t-benefits">' + t.benefits.map(function (b) { return '<li>' + b + '</li>'; }).join('') + '</ul>';
+          body += '<h2 data-cms="' + tb + 'benefitsTitle">' + (t.benefitsTitle || 'Benefits') + '</h2><ul class="t-benefits">' +
+            t.benefits.map(function (b, bi) { return '<li data-cms="' + tb + 'benefits.' + bi + '">' + b + '</li>'; }).join('') + '</ul>';
         }
-        (t.closingSections || []).forEach(function (s) { body += '<h2>' + s.h + '</h2>' + md(s.body); });
+        (t.closingSections || []).forEach(function (s, si) {
+          body += '<h2 data-cms="' + tb + 'closingSections.' + si + '.h">' + s.h + '</h2>' +
+            '<div data-cms-md="' + tb + 'closingSections.' + si + '.body">' + md(s.body) + '</div>';
+        });
         tEl.innerHTML = body;
       }
     }

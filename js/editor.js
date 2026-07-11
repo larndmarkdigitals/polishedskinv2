@@ -57,6 +57,19 @@
     return Array.prototype.slice.call(document.querySelectorAll('[data-cms-record]'))
       .filter(function (e) { return !e.closest('.oe-ui'); });
   }
+  // Markdown blocks — larger rich-text passages edited as their Markdown source
+  // in a panel (data-cms-md=path, or the home/about markdown bindings).
+  var MD_SEL = '[data-cms-md],[data-h-md],[data-a-md]';
+  function mdInfo(e) {
+    if (e.hasAttribute('data-cms-md')) return e.getAttribute('data-cms-md');
+    if (e.hasAttribute('data-h-md'))   return 'home.'  + e.getAttribute('data-h-md');
+    if (e.hasAttribute('data-a-md'))   return 'about.' + e.getAttribute('data-a-md');
+    return null;
+  }
+  function mdBlocks() {
+    return Array.prototype.slice.call(document.querySelectorAll(MD_SEL))
+      .filter(function (e) { return !e.closest('.oe-ui') && !e.closest('[data-cms-record]'); });
+  }
   function readEl(e, multi) {
     return multi ? e.innerText.replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') : (e.textContent || '').trim();
   }
@@ -108,6 +121,10 @@
     'body.oe-on .oe-record{outline:1.5px dashed rgba(176,125,74,.55);outline-offset:4px;border-radius:6px;cursor:pointer;transition:.15s;position:relative;}',
     'body.oe-on .oe-record:hover{outline:2px solid #b07d4a;background:rgba(176,125,74,.06);}',
     'body.oe-on .oe-record-changed{outline-color:#3a7d4a!important;}',
+    'body.oe-on .oe-md-block{outline:1.5px dashed rgba(52,179,168,.55);outline-offset:4px;border-radius:6px;cursor:pointer;transition:.15s;}',
+    'body.oe-on .oe-md-block:hover{outline:2px solid #34b3a8;background:rgba(52,179,168,.06);}',
+    'body.oe-on .oe-md-changed{outline-color:#3a7d4a!important;}',
+    '.oe-md-ta{min-height:280px;font:13.5px/1.6 ui-monospace,Menlo,monospace;}',
     'body.oe-on .oe-changed{outline-color:#3a7d4a!important;background:rgba(58,125,74,.09)!important;}',
     /* panel */
     '.oe-backdrop{position:fixed;inset:0;z-index:10000;background:rgba(20,32,31,.32);opacity:0;pointer-events:none;transition:.2s;}',
@@ -189,6 +206,7 @@
       var has = Object.keys(draft).some(function (k) { return k.indexOf(rp) === 0; });
       e.classList.toggle('oe-record-changed', has);
     });
+    mdBlocks().forEach(function (e) { var k = mdInfo(e); e.classList.toggle('oe-md-changed', !!(k && draft[k] != null)); });
     var n = Object.keys(draft).length;
     pubBtn.disabled = n === 0;
     pubBtn.textContent = n ? 'Publish changes (' + n + ')' : 'Publish changes';
@@ -299,6 +317,27 @@
   }
   function closePanel() { panel.classList.remove('open'); backdrop.classList.remove('show'); }
 
+  // Edit a larger text passage as its Markdown source. Live-renders as you type.
+  function openMdPanel(elm) {
+    var key = mdInfo(elm); if (key == null) return;
+    var draft = loadDraft();
+    var raw = draft[key] != null ? draft[key] : resolvePath(window.CMS_DATA || {}, key);
+    raw = raw == null ? '' : String(raw);
+    panelTitle.textContent = 'Edit text';
+    panelBody.innerHTML = '';
+    var note = el('p', 'oe-hint2');
+    note.textContent = 'Markdown: **bold**, *italic*, ## Heading, - list, [text](link). Saved with the next Publish.';
+    panelBody.appendChild(note);
+    var ta = el('textarea', 'oe-input oe-md-ta'); ta.value = raw;
+    ta.addEventListener('input', function () {
+      setField(key, ta.value);
+      elm.innerHTML = window.PSE_md ? window.PSE_md(ta.value) : ta.value;
+    });
+    panelBody.appendChild(ta);
+    panel.classList.add('open'); backdrop.classList.add('show');
+    setTimeout(function () { ta.focus(); }, 260);
+  }
+
   /* ---------- enter / exit ---------- */
   function enter() {
     editing = true;
@@ -315,6 +354,7 @@
       if (!f.multi) e.addEventListener('keydown', singleLineKeys);
     });
     records().forEach(function (e) { e.classList.add('oe-record'); });
+    mdBlocks().forEach(function (e) { e.classList.add('oe-md-block'); });
     launch.hidden = true; bar.hidden = false;
     refresh();
   }
@@ -330,6 +370,7 @@
       e.removeEventListener('keydown', singleLineKeys);
     });
     records().forEach(function (e) { e.classList.remove('oe-record', 'oe-record-changed'); });
+    mdBlocks().forEach(function (e) { e.classList.remove('oe-md-block', 'oe-md-changed'); });
     launch.hidden = false; bar.hidden = true;
   }
   function singleLineKeys(e) { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } }
@@ -390,6 +431,8 @@
     if (e.target.closest('.oe-ui')) return;
     var rec = e.target.closest('[data-cms-record]');
     if (rec) { e.preventDefault(); e.stopPropagation(); openPanel(rec); return; }
+    var mb = e.target.closest(MD_SEL);
+    if (mb && !mb.closest('.oe-ui')) { e.preventDefault(); e.stopPropagation(); openMdPanel(mb); return; }
     var a = e.target.closest('a');
     if (a && (a.matches(SEL) || a.closest(SEL))) e.preventDefault();
   }, true);
