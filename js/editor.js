@@ -124,6 +124,7 @@
     'body.oe-on .oe-md-block{outline:1.5px dashed rgba(52,179,168,.55);outline-offset:4px;border-radius:6px;cursor:pointer;transition:.15s;}',
     'body.oe-on .oe-md-block:hover{outline:2px solid #34b3a8;background:rgba(52,179,168,.06);}',
     'body.oe-on .oe-md-changed{outline-color:#3a7d4a!important;}',
+    'body.oe-on .faq-a{max-height:none!important;overflow:visible!important;}',  /* reveal FAQ answers to edit them */
     '.oe-md-ta{min-height:280px;font:13.5px/1.6 ui-monospace,Menlo,monospace;}',
     'body.oe-on .oe-changed{outline-color:#3a7d4a!important;background:rgba(58,125,74,.09)!important;}',
     /* panel */

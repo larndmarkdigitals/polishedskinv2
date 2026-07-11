@@ -74,6 +74,7 @@
   }
 
   function set(id, html) { var el = document.getElementById(id); if (el) el.innerHTML = html; }
+  function stampCms(id, path) { var el = document.getElementById(id); if (el) el.setAttribute('data-cms', path); }
 
   /* ---- data-attribute bindings (home page + shared footer/business) ---- */
   function resolvePath(obj, path) {
@@ -259,10 +260,10 @@
 
     /* ---- FAQ (accordion) ---- */
     if (document.getElementById('faq-list')) {
-      set('faq-list', FAQ.map(function (f) {
+      set('faq-list', FAQ.map(function (f, i) {
         return '<div class="faq-item"><button class="faq-q" aria-expanded="false">' +
-          '<span>' + f.q + '</span><span class="faq-ic"></span></button>' +
-          '<div class="faq-a"><div class="faq-a-in">' + md(f.a) + '</div></div></div>';
+          '<span data-cms="faq.faq.' + i + '.q">' + f.q + '</span><span class="faq-ic"></span></button>' +
+          '<div class="faq-a"><div class="faq-a-in" data-cms-md="faq.faq.' + i + '.a">' + md(f.a) + '</div></div></div>';
       }).join(''));
       Array.prototype.forEach.call(document.querySelectorAll('.faq-q'), function (btn) {
         btn.addEventListener('click', function () {
@@ -274,26 +275,26 @@
     }
 
     /* ---- TREATMENT: single detail page ---- */
-    function factItem(label, val) {
-      return val ? '<div class="t-fact"><span class="t-fact-l">' + label + '</span><span class="t-fact-v">' + val + '</span></div>' : '';
+    function factItem(label, val, path) {
+      return val ? '<div class="t-fact"><span class="t-fact-l">' + label + '</span><span class="t-fact-v"' + (path ? ' data-cms="' + path + '"' : '') + '>' + val + '</span></div>' : '';
     }
     var tEl = document.getElementById('treatment-article');
     if (tEl) {
       var tslug = (new URLSearchParams(location.search)).get('slug');
       var t = T.filter(function (x) { return x.slug === tslug; })[0] || T[0];
       if (t) {
+        var tb = 'treatments.treatments.' + T.indexOf(t) + '.';
         document.title = t.name + ' — Polished Skin Eugene';
         set('t-crumb', t.name);
-        set('t-name', t.name);
-        set('t-tagline', t.tagline);
+        set('t-name', t.name); stampCms('t-name', tb + 'name');
+        set('t-tagline', t.tagline); stampCms('t-tagline', tb + 'tagline');
         var bookText = 'Book Your ' + t.name + ' Treatment';
         Array.prototype.forEach.call(document.querySelectorAll('.t-book-btn'), function (b) { b.textContent = bookText; });
-        if (t.facts) set('t-facts', factItem('Time', t.facts.duration) + factItem('Downtime', t.facts.downtime) + factItem('Plan', t.facts.series) + factItem('Best for', t.facts.bestFor) + factItem('Suitable for', t.facts.suitableFor));
+        if (t.facts) set('t-facts', factItem('Time', t.facts.duration, tb + 'facts.duration') + factItem('Downtime', t.facts.downtime, tb + 'facts.downtime') + factItem('Plan', t.facts.series, tb + 'facts.series') + factItem('Best for', t.facts.bestFor, tb + 'facts.bestFor') + factItem('Suitable for', t.facts.suitableFor, tb + 'facts.suitableFor'));
         var th = document.getElementById('t-hero-img');
         if (th) { th.innerHTML = t.img ? '<img loading="lazy" decoding="async" src="' + t.img + '" alt="' + t.name + '">' : SPARK; if (!t.img) th.classList.add('img-ph'); }
         // Stamp the write-up so the on-page editor can edit it: headings/benefits
         // as plain text (data-cms), the rich passages as Markdown (data-cms-md).
-        var tb = 'treatments.treatments.' + T.indexOf(t) + '.';
         var body = '<div data-cms-md="' + tb + 'lead">' + md(t.lead || '').replace('<p>', '<p class="post-lead">') + '</div>';
         (t.sections || []).forEach(function (s, si) {
           body += '<h2 data-cms="' + tb + 'sections.' + si + '.h">' + s.h + '</h2>' +
