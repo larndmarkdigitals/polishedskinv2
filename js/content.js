@@ -13,6 +13,7 @@
   var MARK = '<svg class="mark" viewBox="0 0 24 24" fill="#34b3a8" opacity=".85"><path d="M12 0c.9 6.2 4.9 10.2 11.1 11.1C16.9 12 12.9 16 12 22.2 11.1 16 7.1 12 .9 11.1 7.1 10.2 11.1 6.2 12 0Z"/></svg>';
   var GBADGE = '<div class="gbadge"><svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 01-2.2 3.3v2.7h3.6c2.1-2 3.2-4.9 3.2-7.9z"/><path fill="#34A853" d="M12 23c2.9 0 5.3-1 7.1-2.6l-3.6-2.7c-1 .7-2.3 1.1-3.5 1.1-2.7 0-5-1.8-5.8-4.3H2.4v2.8A11 11 0 0012 23z"/><path fill="#FBBC05" d="M6.2 14.5a6.6 6.6 0 010-4.2V7.5H2.4a11 11 0 000 9.8z"/><path fill="#EA4335" d="M12 5.5c1.5 0 2.9.5 4 1.5l3-3A11 11 0 002.4 7.5l3.8 2.8C7 7.3 9.3 5.5 12 5.5z"/></svg>Verified Google Review</div>';
   var STARS = '<div class="stars">★★★★★</div>';
+  function starsFor(n) { n = Math.max(1, Math.min(5, Math.round(n) || 5)); return '<div class="stars">' + new Array(n + 1).join('★') + '</div>'; }
   var BOOK = "https://polishedskineugene.glossgenius.com/services";
 
   // populated from the JSON files before render() runs
@@ -36,7 +37,7 @@
     var link = s.link || 'services.html';
     var label = s.link ? 'Learn more →' : 'View details →';
     var lead = s.tagline ? '<strong data-cms="services.services.' + i + '.tagline">' + s.tagline + '</strong><br>' : '';
-    return '<div class="svc-card reveal">' + svcImg(s, 'svc-img') +
+    return '<div class="svc-card reveal" data-cms-record="services.services.' + i + '" data-cms-type="service">' + svcImg(s, 'svc-img') +
       '<div class="svc-body"><h3 data-cms="services.services.' + i + '.name">' + s.name + '</h3>' +
       '<p>' + lead + '<span data-cms="services.services.' + i + '.blurb">' + (s.blurb || '') + '</span></p>' +
       '<div class="svc-meta"><a href="' + link + '" class="svc-link">' + label + '</a></div></div></div>';
@@ -46,7 +47,7 @@
     var i = S.indexOf(s);
     var dur = s.duration ? '<div class="mr-dur" data-cms="services.services.' + i + '.duration">' + s.duration + '</div>' : '';
     var learn = s.link ? '<a class="mr-learn" href="' + s.link + '">Learn more →</a>' : '';
-    return '<div class="menu-row"><div><div class="mr-name" data-cms="services.services.' + i + '.name">' + s.name + '</div>' +
+    return '<div class="menu-row" data-cms-record="services.services.' + i + '" data-cms-type="service"><div><div class="mr-name" data-cms="services.services.' + i + '.name">' + s.name + '</div>' +
       '<div class="mr-desc" data-cms="services.services.' + i + '.desc">' + (s.desc || s.blurb || '') + '</div>' + dur + learn +
       '</div><div class="mr-price" data-cms="services.services.' + i + '.price">' + (s.price || 'Inquire') + '</div></div>';
   }
@@ -54,7 +55,7 @@
   function revCard(r) {
     var i = R.indexOf(r);
     var initial = (r.name || '?').trim().charAt(0).toUpperCase();
-    return '<div class="tst-card reveal">' + STARS +
+    return '<div class="tst-card reveal" data-cms-record="reviews.reviews.' + i + '" data-cms-type="review">' + starsFor(r.rating) +
       '<p>"<span data-cms="reviews.reviews.' + i + '.text">' + r.text + '</span>"</p>' +
       '<div class="tst-by"><div class="tst-av">' + initial + '</div>' +
       '<div><div class="n" data-cms="reviews.reviews.' + i + '.name">' + r.name + '</div>' +
@@ -130,18 +131,24 @@
     var tel = function () {
       return '<a href="tel:' + (b.phoneDigits || '') + '">' + (b.phone || '') + '</a>';
     };
+    // Mark the footer/visit/hours blocks as the "business" record so the editor
+    // opens the business-info panel when you click them.
+    var stampBiz = function (el) { el.setAttribute('data-cms-record', 'site.business'); el.setAttribute('data-cms-type', 'business'); };
     eachAttr('data-s-footvisit', function (el) {
       el.innerHTML = (b.addressLine || '') + '<br>' + (b.cityStateZip || '') + '<br>' + tel() + '<br><br>' +
         (b.hoursNote || '') + '<br>' + (b.closedNote || '') + '<br><br>' +
         '<a href="' + BOOK + '" target="_blank" rel="noopener" style="color:var(--teal);font-weight:600;">' + (f.bookLink || 'Book online →') + '</a>';
+      stampBiz(el);
     });
     eachAttr('data-s-visitcontact', function (el) {
       el.innerHTML = '<strong>' + (b.name || '') + '</strong><br>' + (b.addressLine || '') + '<br>' + (b.cityStateZip || '') + '<br>' + tel();
+      stampBiz(el);
     });
     eachAttr('data-s-hours', function (el) {
       el.innerHTML = (b.hours || []).map(function (h) {
         return '<div class="hours-row' + (h.closed ? ' closed' : '') + '"><span class="day">' + h.day + '</span><span class="time">' + h.time + '</span></div>';
       }).join('');
+      stampBiz(el);
     });
   }
 
@@ -160,9 +167,9 @@
     var fr = R.filter(function (r) { return r.featured; })[0] || R[0];
     if (fr) {
       set('featured-review-home', MARK + '<blockquote>"' + fr.text + '"</blockquote>' +
-        STARS + '<div class="by">' + fr.name + ' <span>· ' + fr.service + '</span></div>' + GBADGE);
+        starsFor(fr.rating) + '<div class="by">' + fr.name + ' <span>· ' + fr.service + '</span></div>' + (fr.verified === false ? '' : GBADGE));
       set('featured-review', MARK + '<blockquote>"' + fr.text + '"</blockquote>' +
-        STARS + '<div class="by">' + fr.name + ' <span>· ' + fr.service + '</span></div>');
+        starsFor(fr.rating) + '<div class="by">' + fr.name + ' <span>· ' + fr.service + '</span></div>');
     }
 
     /* ---- HOME: review grid (3) ---- */
@@ -239,7 +246,7 @@
       var base = 'packages.packages.' + pi + '.';
       var ribbon = p.popular ? '<span class="pkg-ribbon">Most Popular</span>' : '';
       var inc = (p.includes || []).map(function (item, j) { return '<li data-cms="' + base + 'includes.' + j + '">' + item + '</li>'; }).join('');
-      return '<div class="pkg-card reveal' + (p.popular ? ' pkg-pop' : '') + '">' + ribbon +
+      return '<div class="pkg-card reveal' + (p.popular ? ' pkg-pop' : '') + '" data-cms-record="packages.packages.' + pi + '" data-cms-type="package">' + ribbon +
         '<h3 data-cms="' + base + 'name">' + p.name + '</h3><p class="pkg-tag" data-cms="' + base + 'tagline">' + p.tagline + '</p>' +
         '<p class="pkg-desc" data-cms="' + base + 'desc">' + p.desc + '</p>' +
         '<div class="pkg-for"><span>Best for:</span> <span data-cms="' + base + 'forWho">' + p.forWho + '</span></div>' +
@@ -330,6 +337,14 @@
     HOME = res[7] || {};
     SITE = res[8] || {};
     ABOUT = res[9] || {};
+    // Expose the raw loaded JSON (keyed by file name) so the on-page editor's
+    // side panel can read a record's current field values by path, e.g.
+    // CMS_DATA.reviews.reviews[3] or CMS_DATA.site.business.hours.
+    window.CMS_DATA = {
+      services: res[0] || {}, reviews: res[1] || {}, posts: res[2] || {},
+      treatments: res[3] || {}, packages: res[4] || {}, faq: res[5] || {},
+      gallery: res[6] || {}, home: HOME, site: SITE, about: ABOUT
+    };
     try { render(); } catch (e) { if (window.console) console.error('content render failed', e); }
     ready();
   });

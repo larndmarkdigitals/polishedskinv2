@@ -59,10 +59,18 @@ exports.handler = async function (event) {
     return json(400, { error: 'No changes provided.' });
   }
 
+  // Accept the widget value types the editor sends: text, numbers (stars),
+  // toggles (booleans), and lists (arrays of strings).
+  const okValue = (v) => {
+    const t = typeof v;
+    if (t === 'string' || t === 'number' || t === 'boolean') return true;
+    return Array.isArray(v) && v.every((x) => typeof x === 'string');
+  };
+
   // Group edits by target file: { home: [[path,val],…], site: […] }
   const byFile = {};
   for (const [key, val] of Object.entries(changes)) {
-    if (typeof val !== 'string') return json(400, { error: 'Values must be text.' });
+    if (!okValue(val)) return json(400, { error: 'Unsupported value for ' + key });
     const dot = key.indexOf('.');
     if (dot < 1) return json(400, { error: 'Bad field key: ' + key });
     const file = key.slice(0, dot);
