@@ -70,6 +70,61 @@
     return Array.prototype.slice.call(document.querySelectorAll(MD_SEL))
       .filter(function (e) { return !e.closest('.oe-ui') && !e.closest('[data-cms-record]'); });
   }
+  // Image slots — click to upload a new photo (resized in-browser, committed to
+  // img/ on publish). data-cms-img=path, or the home/about image bindings.
+  var IMG_SEL = '[data-cms-img],[data-h-img],[data-a-img]';
+  function imgInfo(e) {
+    if (e.hasAttribute('data-cms-img')) return e.getAttribute('data-cms-img');
+    if (e.hasAttribute('data-h-img'))   return 'home.'  + e.getAttribute('data-h-img');
+    if (e.hasAttribute('data-a-img'))   return 'about.' + e.getAttribute('data-a-img');
+    return null;
+  }
+  function imgSlots() {
+    return Array.prototype.slice.call(document.querySelectorAll(IMG_SEL))
+      .filter(function (e) { return !e.closest('.oe-ui'); });
+  }
+  function resizeImage(file, max, quality, cb) {
+    var reader = new FileReader();
+    reader.onload = function () {
+      var img = new Image();
+      img.onload = function () {
+        var w = img.width, h = img.height;
+        if (w > max || h > max) { if (w > h) { h = Math.round(h * max / w); w = max; } else { w = Math.round(w * max / h); h = max; } }
+        var c = document.createElement('canvas'); c.width = w; c.height = h;
+        c.getContext('2d').drawImage(img, 0, 0, w, h);
+        try { cb(c.toDataURL('image/jpeg', quality)); } catch (e) { cb(reader.result); }
+      };
+      img.onerror = function () { toast('Sorry, that image couldn’t be loaded.'); };
+      img.src = reader.result;
+    };
+    reader.readAsDataURL(file);
+  }
+  function setImgPreview(elm, url) {
+    var inner = elm.querySelector('img');
+    if (inner) inner.src = url;
+    else elm.insertAdjacentHTML('afterbegin', '<img loading="lazy" decoding="async" src="' + url + '" alt="">');
+    elm.classList.remove('img-ph');
+    if (/background-image/.test(elm.getAttribute('style') || '')) elm.style.backgroundImage = 'url("' + url + '")';
+  }
+  function pickPhoto(elm) {
+    var key = imgInfo(elm); if (key == null) return;
+    var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
+    inp.addEventListener('change', function () {
+      var f = inp.files && inp.files[0]; if (!f) return;
+      resizeImage(f, 1500, 0.82, function (dataUrl) {
+        var b64 = (dataUrl.split(',')[1]) || '';
+        var fname = 'img/oe-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
+        var d = loadDraft();
+        var prev = d[key]; if (prev && d['__img:' + prev] != null) delete d['__img:' + prev]; // drop replaced upload
+        d[key] = fname; d['__img:' + fname] = b64;
+        try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }
+        catch (e) { toast('That image is too large to stage — try a smaller photo, or Publish first.'); return; }
+        setImgPreview(elm, dataUrl); refresh();
+        toast('Photo staged — hit Publish to save it.');
+      });
+    });
+    inp.click();
+  }
   function readEl(e, multi) {
     return multi ? e.innerText.replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') : (e.textContent || '').trim();
   }
@@ -125,6 +180,10 @@
     'body.oe-on .oe-md-block:hover{outline:2px solid #34b3a8;background:rgba(52,179,168,.06);}',
     'body.oe-on .oe-md-changed{outline-color:#3a7d4a!important;}',
     'body.oe-on .faq-a{max-height:none!important;overflow:visible!important;}',  /* reveal FAQ answers to edit them */
+    'body.oe-on .oe-img{position:relative;cursor:pointer;}',
+    '.oe-img-cta{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(22,32,31,.42);color:#fff;font:600 13px Jost,system-ui,sans-serif;opacity:0;transition:.15s;z-index:5;border-radius:inherit;pointer-events:none;}',
+    'body.oe-on .oe-img:hover .oe-img-cta{opacity:1;}',
+    'body.oe-on .oe-img-changed .oe-img-cta{opacity:1;background:rgba(58,125,74,.5);}',
     '.oe-md-ta{min-height:280px;font:13.5px/1.6 ui-monospace,Menlo,monospace;}',
     'body.oe-on .oe-changed{outline-color:#3a7d4a!important;background:rgba(58,125,74,.09)!important;}',
     /* panel */
@@ -208,7 +267,8 @@
       e.classList.toggle('oe-record-changed', has);
     });
     mdBlocks().forEach(function (e) { var k = mdInfo(e); e.classList.toggle('oe-md-changed', !!(k && draft[k] != null)); });
-    var n = Object.keys(draft).length;
+    imgSlots().forEach(function (e) { var k = imgInfo(e); e.classList.toggle('oe-img-changed', !!(k && draft[k] != null)); });
+    var n = Object.keys(draft).filter(function (k) { return k.indexOf('__img:') !== 0; }).length;   // image data keys aren't counted
     pubBtn.disabled = n === 0;
     pubBtn.textContent = n ? 'Publish changes (' + n + ')' : 'Publish changes';
   }
@@ -356,6 +416,10 @@
     });
     records().forEach(function (e) { e.classList.add('oe-record'); });
     mdBlocks().forEach(function (e) { e.classList.add('oe-md-block'); });
+    imgSlots().forEach(function (e) {
+      e.classList.add('oe-img');
+      if (!e.querySelector('.oe-img-cta')) { var cta = el('div', 'oe-img-cta'); cta.textContent = '📷 Change photo'; e.appendChild(cta); }
+    });
     launch.hidden = true; bar.hidden = false;
     refresh();
   }
@@ -372,6 +436,7 @@
     });
     records().forEach(function (e) { e.classList.remove('oe-record', 'oe-record-changed'); });
     mdBlocks().forEach(function (e) { e.classList.remove('oe-md-block', 'oe-md-changed'); });
+    imgSlots().forEach(function (e) { e.classList.remove('oe-img', 'oe-img-changed'); var c = e.querySelector('.oe-img-cta'); if (c) c.remove(); });
     launch.hidden = false; bar.hidden = true;
   }
   function singleLineKeys(e) { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } }
@@ -379,12 +444,17 @@
   /* ---------- publish ---------- */
   function publish() {
     var draft = syncDraft();
-    if (!Object.keys(draft).length) { toast('No changes to publish yet.'); return; }
+    var changes = {}, images = [];
+    Object.keys(draft).forEach(function (k) {
+      if (k.indexOf('__img:') === 0) images.push({ path: k.slice(6), content: draft[k] });
+      else changes[k] = draft[k];
+    });
+    if (!Object.keys(changes).length && !images.length) { toast('No changes to publish yet.'); return; }
     var pw = sessionStorage.getItem(PW_KEY) || window.prompt('Enter the edit password to publish:');
     if (!pw) return;
     sessionStorage.setItem(PW_KEY, pw);
     pubBtn.disabled = true; var label = pubBtn.textContent; pubBtn.textContent = 'Publishing…';
-    fetch(SAVE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw, changes: draft }) })
+    fetch(SAVE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: pw, changes: changes, images: images }) })
       .then(function (r) { return r.json().then(function (j) { return { status: r.status, ok: r.ok, body: j }; }, function () { return { status: r.status, ok: r.ok, body: {} }; }); })
       .then(function (res) {
         if (res.status === 401) { sessionStorage.removeItem(PW_KEY); toast('That password didn’t work — try again.'); return; }
@@ -430,6 +500,8 @@
   document.addEventListener('click', function (e) {
     if (!editing) return;
     if (e.target.closest('.oe-ui')) return;
+    var imgEl = e.target.closest(IMG_SEL);          // image click = upload (takes precedence over records)
+    if (imgEl) { e.preventDefault(); e.stopPropagation(); pickPhoto(imgEl); return; }
     var rec = e.target.closest('[data-cms-record]');
     if (rec) { e.preventDefault(); e.stopPropagation(); openPanel(rec); return; }
     var mb = e.target.closest(MD_SEL);

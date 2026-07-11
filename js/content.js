@@ -23,9 +23,10 @@
   function md(s) { return window.PSE_md ? window.PSE_md(s) : (s || ''); }
 
   function svcImg(s, cls) {
+    var ip = ' data-cms-img="services.services.' + S.indexOf(s) + '.img"';
     return s && s.img
-      ? '<div class="' + cls + '"><img loading="lazy" decoding="async" src="' + s.img + '" alt="' + s.name + '"></div>'
-      : '<div class="' + cls + ' img-ph">' + SPARK + '</div>';
+      ? '<div class="' + cls + '"' + ip + '><img loading="lazy" decoding="async" src="' + s.img + '" alt="' + s.name + '"></div>'
+      : '<div class="' + cls + ' img-ph"' + ip + '>' + SPARK + '</div>';
   }
 
   // data-cms="file.path" marks a field the on-page editor can edit (editor.js
@@ -196,20 +197,21 @@
     set('all-reviews', R.map(revCard).join(''));
 
     /* ---- GALLERY: before/after pairs + photo grid ---- */
-    function photoSlot(cls, src, tag) {
+    function photoSlot(cls, src, tag, path) {
       var inner = src ? '<img loading="lazy" decoding="async" src="' + src + '" alt="' + (tag || '') + '">' : SPARK;
       var t = tag ? '<span class="bap-tag">' + tag + '</span>' : '';
-      return '<div class="' + cls + (src ? '' : ' img-ph') + '">' + inner + t + '</div>';
+      return '<div class="' + cls + (src ? '' : ' img-ph') + '"' + (path ? ' data-cms-img="' + path + '"' : '') + '>' + inner + t + '</div>';
     }
     function baPair(p) {
+      var gi = GBA.indexOf(p);
       return '<div class="ba-pair reveal"><div class="bap-row">' +
-        photoSlot('bap-photo', p.before, 'Before') +
-        photoSlot('bap-photo', p.after, 'After') +
+        photoSlot('bap-photo', p.before, 'Before', 'gallery.beforeAfter.' + gi + '.before') +
+        photoSlot('bap-photo', p.after, 'After', 'gallery.beforeAfter.' + gi + '.after') +
         '</div><div class="bap-cap">' + (p.treatment || '') + '</div></div>';
     }
     function galItem(g) {
       var inner = g.img ? '<img loading="lazy" decoding="async" src="' + g.img + '" alt="' + (g.treatment || '') + '">' : SPARK;
-      return '<div class="gal-item reveal"><div class="gal-photo' + (g.img ? '' : ' img-ph') + '">' + inner +
+      return '<div class="gal-item reveal"><div class="gal-photo' + (g.img ? '' : ' img-ph') + '" data-cms-img="gallery.gallery.' + GAL.indexOf(g) + '.img">' + inner +
         '</div><div class="gal-cap">' + (g.treatment || '') + '</div></div>';
     }
     set('ba-gallery', GBA.map(baPair).join(''));
@@ -233,6 +235,7 @@
         if (hero) {
           hero.innerHTML = post.img ? '<img loading="lazy" decoding="async" src="' + post.img + '" alt="">' : SPARK;
           if (!post.img) hero.classList.add('img-ph');
+          hero.setAttribute('data-cms-img', pb + 'img');
         }
         // keep the larger "lead" styling on the first paragraph
         article.innerHTML = md(post.body).replace(/^<p>/, '<p class="post-lead">');
@@ -292,7 +295,7 @@
         Array.prototype.forEach.call(document.querySelectorAll('.t-book-btn'), function (b) { b.textContent = bookText; });
         if (t.facts) set('t-facts', factItem('Time', t.facts.duration, tb + 'facts.duration') + factItem('Downtime', t.facts.downtime, tb + 'facts.downtime') + factItem('Plan', t.facts.series, tb + 'facts.series') + factItem('Best for', t.facts.bestFor, tb + 'facts.bestFor') + factItem('Suitable for', t.facts.suitableFor, tb + 'facts.suitableFor'));
         var th = document.getElementById('t-hero-img');
-        if (th) { th.innerHTML = t.img ? '<img loading="lazy" decoding="async" src="' + t.img + '" alt="' + t.name + '">' : SPARK; if (!t.img) th.classList.add('img-ph'); }
+        if (th) { th.innerHTML = t.img ? '<img loading="lazy" decoding="async" src="' + t.img + '" alt="' + t.name + '">' : SPARK; if (!t.img) th.classList.add('img-ph'); th.setAttribute('data-cms-img', tb + 'img'); }
         // Stamp the write-up so the on-page editor can edit it: headings/benefits
         // as plain text (data-cms), the rich passages as Markdown (data-cms-md).
         var body = '<div data-cms-md="' + tb + 'lead">' + md(t.lead || '').replace('<p>', '<p class="post-lead">') + '</div>';

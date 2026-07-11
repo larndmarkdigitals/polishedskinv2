@@ -54,9 +54,18 @@ exports.handler = async function (event) {
 
   if (EDIT_PASSWORD && payload.password !== EDIT_PASSWORD) return json(401, { error: 'Wrong password.' });
 
-  const changes = payload.changes;
-  if (!changes || typeof changes !== 'object' || !Object.keys(changes).length) {
+  const changes = (payload.changes && typeof payload.changes === 'object') ? payload.changes : {};
+  const images = Array.isArray(payload.images) ? payload.images : [];
+  if (!Object.keys(changes).length && !images.length) {
     return json(400, { error: 'No changes provided.' });
+  }
+  // Uploaded images: { path: "img/oe-….jpg", content: "<base64>" }. Path is
+  // restricted to the img/ folder with a safe filename so nothing else is
+  // overwritten.
+  for (const im of images) {
+    if (!im || typeof im.content !== 'string' || !/^img\/[A-Za-z0-9._-]+$/.test(im.path || '')) {
+      return json(400, { error: 'Bad image upload.' });
+    }
   }
 
   // Accept the widget value types the editor sends: text, numbers (stars),
@@ -120,6 +129,16 @@ exports.handler = async function (event) {
       });
       treeItems.push({ path: `content/${file}.json`, mode: '100644', type: 'blob', sha: blob.sha });
       saved.push(file + '.json');
+    }
+
+    // 2b. upload any images as binary blobs into img/
+    for (const im of images) {
+      const blob = await gh(`${repo}/git/blobs`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ content: im.content, encoding: 'base64' })
+      });
+      treeItems.push({ path: im.path, mode: '100644', type: 'blob', sha: blob.sha });
+      saved.push(im.path);
     }
 
     // 3. new tree -> new commit -> move the branch
