@@ -104,6 +104,7 @@
     if (inner) inner.src = url;
     else elm.insertAdjacentHTML('afterbegin', '<img loading="lazy" decoding="async" src="' + url + '" alt="">');
     elm.classList.remove('img-ph');
+    elm.classList.add('oe-has-photo');   // CSS hides the sparkle placeholder / label so only the photo shows
     if (/background-image/.test(elm.getAttribute('style') || '')) elm.style.backgroundImage = 'url("' + url + '")';
   }
   function newImgName() { return 'img/oe-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg'; }
@@ -242,6 +243,7 @@
     'body.oe-on .oe-img:hover .oe-img-cta{opacity:1;}',
     'body.oe-on .oe-img-changed .oe-img-cta{opacity:1;background:rgba(58,125,74,.5);}',
     '.oe-drop{outline:3px dashed #34b3a8!important;outline-offset:2px;}',
+    '.oe-has-photo > svg, .oe-has-photo > .ph-label, .oe-has-photo > .ba-ph{display:none!important;}',
     '.oe-media{position:fixed;inset:0;z-index:10003;background:#f6efe6;display:none;flex-direction:column;font:14px Inter,system-ui,sans-serif;color:#2c2019;}',
     '.oe-media.show{display:flex;}',
     '.oe-media-head{display:flex;align-items:center;gap:14px;padding:16px 22px;background:#16201f;color:#fff;}',
