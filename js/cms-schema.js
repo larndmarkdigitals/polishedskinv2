@@ -70,3 +70,27 @@ window.CMS_SCHEMA = {
     ]
   }
 };
+
+/* ============================================================
+   CMS_MEDIA — the Photos grid registry (per-site, like CMS_SCHEMA).
+   Lists every image on the site with a label. The editor's "🖼 Photos"
+   view builds a tile per entry (collections expand one tile per item;
+   {name}/{title}/{n} are filled from the content).
+
+   dropboxAppKey: paste a Dropbox app key to enable "Choose from Dropbox"
+   (create a free app at dropbox.com/developers, add this site's domain
+   under the app's Chooser/Saver domains). Leave '' to hide Dropbox.
+   ============================================================ */
+window.CMS_MEDIA = {
+  dropboxAppKey: '',
+  fields: [
+    { key: 'home.hero.img',      label: 'Homepage — hero photo' },
+    { key: 'home.about.img',     label: 'Homepage — clinic photo' },
+    { key: 'about.clinicPhoto',  label: 'About page — clinic photo' },
+    { collection: 'services.services',     imgKey: 'img', label: 'Service: {name}' },
+    { collection: 'treatments.treatments', imgKey: 'img', label: 'Treatment: {name}' },
+    { collection: 'posts.posts',           imgKey: 'img', label: 'Blog: {title}' },
+    { collection: 'gallery.gallery',       imgKey: 'img', label: 'Gallery #{n}' },
+    { pairCollection: 'gallery.beforeAfter', keys: ['before', 'after'], label: 'Before/After #{n}' }
+  ]
+};

@@ -106,24 +106,46 @@
     elm.classList.remove('img-ph');
     if (/background-image/.test(elm.getAttribute('style') || '')) elm.style.backgroundImage = 'url("' + url + '")';
   }
-  function pickPhoto(elm) {
-    var key = imgInfo(elm); if (key == null) return;
+  function newImgName() { return 'img/oe-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg'; }
+  // Stage a resized dataURL for a field: write path + base64 into the draft,
+  // preview it (given element + any matching on-page slot), refresh. Reused by
+  // click, drag-drop, paste, the media grid, and Dropbox.
+  function stageImage(fieldKey, dataUrl, previewEl) {
+    if (!fieldKey) return false;
+    var b64 = (String(dataUrl).split(',')[1]) || '';
+    var fname = newImgName();
+    var d = loadDraft();
+    var prev = d[fieldKey]; if (prev && d['__img:' + prev] != null) delete d['__img:' + prev];
+    d[fieldKey] = fname; d['__img:' + fname] = b64;
+    try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }
+    catch (e) { toast('That image is too large to stage — try a smaller photo, or Publish first.'); return false; }
+    if (previewEl) setImgPreview(previewEl, dataUrl);
+    imgSlots().forEach(function (s) { if (imgInfo(s) === fieldKey) setImgPreview(s, dataUrl); });
+    refresh();
+    return fname;
+  }
+  function stageFile(fieldKey, file, previewEl, done) {
+    if (!file || !/^image\//.test(file.type || '')) { toast('That doesn’t look like an image file.'); return; }
+    resizeImage(file, 1500, 0.82, function (dataUrl) { var n = stageImage(fieldKey, dataUrl, previewEl); if (done) done(n, dataUrl); });
+  }
+  function pickPhotoFor(fieldKey, previewEl, done) {
     var inp = document.createElement('input'); inp.type = 'file'; inp.accept = 'image/*';
-    inp.addEventListener('change', function () {
-      var f = inp.files && inp.files[0]; if (!f) return;
-      resizeImage(f, 1500, 0.82, function (dataUrl) {
-        var b64 = (dataUrl.split(',')[1]) || '';
-        var fname = 'img/oe-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg';
-        var d = loadDraft();
-        var prev = d[key]; if (prev && d['__img:' + prev] != null) delete d['__img:' + prev]; // drop replaced upload
-        d[key] = fname; d['__img:' + fname] = b64;
-        try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }
-        catch (e) { toast('That image is too large to stage — try a smaller photo, or Publish first.'); return; }
-        setImgPreview(elm, dataUrl); refresh();
-        toast('Photo staged — hit Publish to save it.');
-      });
-    });
+    inp.addEventListener('change', function () { var f = inp.files && inp.files[0]; if (f) stageFile(fieldKey, f, previewEl, done); });
     inp.click();
+  }
+  function pickPhoto(elm) { var key = imgInfo(elm); if (key != null) pickPhotoFor(key, elm, function () { toast('Photo staged — hit Publish to save it.'); }); }
+
+  var draggingTray = null;   // a media-tray thumbnail being dragged onto a tile
+  // Drag-and-drop onto an image slot or media tile. getKey() returns the field.
+  function attachDrop(el, getKey, previewEl) {
+    el.addEventListener('dragover', function (ev) { ev.preventDefault(); ev.stopPropagation(); el.classList.add('oe-drop'); });
+    el.addEventListener('dragleave', function (ev) { ev.stopPropagation(); el.classList.remove('oe-drop'); });
+    el.addEventListener('drop', function (ev) {
+      ev.preventDefault(); ev.stopPropagation(); el.classList.remove('oe-drop');
+      var f = ev.dataTransfer && ev.dataTransfer.files && ev.dataTransfer.files[0];
+      if (f) { stageFile(getKey(), f, previewEl || el, function () { toast('Photo staged — hit Publish.'); }); }
+      else if (draggingTray) { stageImage(getKey(), draggingTray.url, previewEl || el); trayRemove(draggingTray); draggingTray = null; toast('Assigned — hit Publish.'); }
+    });
   }
   function readEl(e, multi) {
     return multi ? e.innerText.replace(/\n{3,}/g, '\n\n').replace(/\s+$/, '') : (e.textContent || '').trim();
@@ -219,6 +241,29 @@
     '.oe-img-cta{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;gap:6px;background:rgba(22,32,31,.42);color:#fff;font:600 13px Jost,system-ui,sans-serif;opacity:0;transition:.15s;z-index:5;border-radius:inherit;pointer-events:none;}',
     'body.oe-on .oe-img:hover .oe-img-cta{opacity:1;}',
     'body.oe-on .oe-img-changed .oe-img-cta{opacity:1;background:rgba(58,125,74,.5);}',
+    '.oe-drop{outline:3px dashed #34b3a8!important;outline-offset:2px;}',
+    '.oe-media{position:fixed;inset:0;z-index:10003;background:#f6efe6;display:none;flex-direction:column;font:14px Inter,system-ui,sans-serif;color:#2c2019;}',
+    '.oe-media.show{display:flex;}',
+    '.oe-media-head{display:flex;align-items:center;gap:14px;padding:16px 22px;background:#16201f;color:#fff;}',
+    '.oe-media-head h3{margin:0;font:600 18px Jost,serif;}',
+    '.oe-media-sub{color:#bfe9e4;font-size:13px;margin-right:auto;}',
+    '.oe-media .oe-close{background:rgba(255,255,255,.14);color:#fff;}',
+    '.oe-media-body{padding:20px 22px;overflow-y:auto;flex:1;}',
+    '.oe-bulk{border:2px dashed #cbb89f;border-radius:12px;padding:16px;text-align:center;color:#6f5b48;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;}',
+    '.oe-tray{display:flex;flex-wrap:wrap;gap:10px;}',
+    '.oe-tray-h{width:100%;font-size:12.5px;color:#8a7862;margin-bottom:2px;}',
+    '.oe-tray-item{position:relative;width:92px;height:92px;border-radius:8px;overflow:hidden;cursor:grab;box-shadow:0 3px 10px rgba(0,0,0,.15);}',
+    '.oe-tray-item img{width:100%;height:100%;object-fit:cover;}',
+    '.oe-tray-g{position:absolute;left:0;right:0;bottom:0;border:none;background:rgba(22,32,31,.72);color:#fff;font:600 11px Jost,system-ui,sans-serif;padding:3px;cursor:pointer;}',
+    '.oe-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:16px;margin-top:14px;}',
+    '.oe-tile{background:#fff;border:1px solid #e7dccd;border-radius:12px;overflow:hidden;box-shadow:0 4px 14px rgba(58,35,23,.06);}',
+    '.oe-tile-img{aspect-ratio:4/3;background:#efe4d4;cursor:pointer;display:flex;align-items:center;justify-content:center;position:relative;}',
+    '.oe-tile-img img{width:100%;height:100%;object-fit:cover;}',
+    '.oe-tile-img.img-ph::after{content:"No photo yet";color:#b0a08c;font-size:12.5px;}',
+    '.oe-tile-label{padding:9px 12px 4px;font:600 12.5px Jost,system-ui,sans-serif;color:#4a3a2c;}',
+    '.oe-tile-acts{padding:0 12px 11px;display:flex;gap:6px;}',
+    '.oe-tb{border:1px solid #ddd0be;background:#faf6f0;color:#6f5b48;border-radius:7px;padding:5px 10px;font:600 12px Jost,system-ui,sans-serif;cursor:pointer;}',
+    '.oe-tb:hover{background:#f2ece3;}',
     '.oe-md-ta{min-height:280px;font:13.5px/1.6 ui-monospace,Menlo,monospace;}',
     'body.oe-on .oe-changed{outline-color:#3a7d4a!important;background:rgba(58,125,74,.09)!important;}',
     /* panel */
@@ -263,7 +308,8 @@
 
   var bar = el('div', 'oe-ui oe-bar'); bar.hidden = true;
   bar.innerHTML =
-    '<span class="hint"><span class="dot"></span>Click plain text to type, or click a review / service / hours to open its editor. Move between pages freely.</span>' +
+    '<span class="hint"><span class="dot"></span>Click text to type, a card to open its editor, or a photo to change it. Move between pages freely.</span>' +
+    '<button class="oe-b oe-ghost oe-photos">🖼 Photos</button>' +
     '<button class="oe-b oe-pub" disabled>Publish changes</button>' +
     '<button class="oe-b oe-ghost oe-discard">Discard all</button>' +
     '<button class="oe-b oe-ghost oe-exit">Done</button>';
@@ -520,7 +566,8 @@
     mdBlocks().forEach(function (e) { e.classList.add('oe-md-block'); });
     imgSlots().forEach(function (e) {
       e.classList.add('oe-img');
-      if (!e.querySelector('.oe-img-cta')) { var cta = el('div', 'oe-img-cta'); cta.textContent = '📷 Change photo'; e.appendChild(cta); }
+      if (!e.querySelector('.oe-img-cta')) { var cta = el('div', 'oe-img-cta'); cta.textContent = '📷 Click or drop a photo'; e.appendChild(cta); }
+      if (!e._oeDrop) { e._oeDrop = true; attachDrop(e, (function (slot) { return function () { return imgInfo(slot); }; })(e), e); }
     });
     stampCollections();
     launch.hidden = true; bar.hidden = false;
@@ -582,9 +629,152 @@
     toastTimer = setTimeout(function () { t.classList.remove('show'); }, 4600);
   }
 
+  /* ---------- media library (Photos grid + bulk tray + Dropbox) ---------- */
+  var MEDIA = window.CMS_MEDIA || { fields: [] };
+  var tray = [];   // in-memory bulk uploads not yet assigned to a spot
+
+  var mediaOverlay = el('div', 'oe-ui oe-media');
+  mediaOverlay.innerHTML = '<div class="oe-media-head"><h3>Photos</h3><span class="oe-media-sub">Click, drag a file, or pick from Dropbox onto any spot. Everything saves with Publish.</span><button class="oe-close" title="Close">✕</button></div><div class="oe-media-body"></div>';
+  document.body.appendChild(mediaOverlay);
+  var mediaBody = mediaOverlay.querySelector('.oe-media-body');
+  mediaOverlay.querySelector('.oe-close').addEventListener('click', closeMedia);
+
+  function draftArr(collPath, data) { var d = loadDraft(); return Array.isArray(d[collPath]) ? d[collPath] : (resolvePath(data, collPath) || []); }
+  function curImg(fieldKey, data) { var d = loadDraft(); return d[fieldKey] != null ? d[fieldKey] : resolvePath(data, fieldKey); }
+  function tileSrc(url) { var d = loadDraft(); return (url && d['__img:' + url]) ? 'data:image/jpeg;base64,' + d['__img:' + url] : (url || ''); }
+
+  function mediaTiles() {
+    var out = [], data = window.CMS_DATA || {};
+    (MEDIA.fields || []).forEach(function (f) {
+      if (f.key) { out.push({ key: f.key, label: f.label, url: curImg(f.key, data) }); return; }
+      if (f.collection) {
+        draftArr(f.collection, data).forEach(function (item, i) {
+          var k = f.collection + '.' + i + '.' + (f.imgKey || 'img');
+          var label = String(f.label || '').replace('{name}', item.name || '').replace('{title}', item.title || '').replace('{n}', i + 1);
+          out.push({ key: k, label: label, url: curImg(k, data) });
+        });
+      } else if (f.pairCollection) {
+        draftArr(f.pairCollection, data).forEach(function (item, i) {
+          (f.keys || []).forEach(function (kk) {
+            var k = f.pairCollection + '.' + i + '.' + kk;
+            out.push({ key: k, label: String(f.label || '').replace('{n}', i + 1) + ' — ' + kk, url: curImg(k, data) });
+          });
+        });
+      }
+    });
+    return out;
+  }
+
+  function addGalleryPhoto(dataUrl) {
+    var fname = newImgName();
+    var d = loadDraft(); d['__img:' + fname] = (String(dataUrl).split(',')[1]) || ''; saveDraft(d);
+    var arr = materialize('gallery.gallery'); arr.push({ img: fname, treatment: '' }); saveColl('gallery.gallery', arr);
+    toast('Added a gallery photo — hit Publish.');
+  }
+
+  /* ---- bulk tray ---- */
+  function trayAddFile(file) { if (/^image\//.test(file.type || '')) resizeImage(file, 1500, 0.82, function (u) { tray.push({ url: u }); renderTray(); }); }
+  function trayAddBlob(blob) { resizeImage(blob, 1500, 0.82, function (u) { tray.push({ url: u }); renderTray(); }); }
+  function trayRemove(item) { var i = tray.indexOf(item); if (i >= 0) { tray.splice(i, 1); renderTray(); } }
+  function renderTray() {
+    var t = mediaBody.querySelector('.oe-tray'); if (!t) return;
+    t.innerHTML = tray.length ? '<div class="oe-tray-h">Drag each onto a spot below, or “＋ Gallery” to add it to the gallery:</div>' : '';
+    tray.forEach(function (item) {
+      var th = el('div', 'oe-tray-item'); th.draggable = true;
+      th.innerHTML = '<img src="' + item.url + '">';
+      var g = el('button', 'oe-tray-g'); g.type = 'button'; g.textContent = '＋ Gallery';
+      g.addEventListener('click', function () { addGalleryPhoto(item.url); trayRemove(item); });
+      th.appendChild(g);
+      th.addEventListener('dragstart', function () { draggingTray = item; });
+      th.addEventListener('dragend', function () { setTimeout(function () { draggingTray = null; }, 60); });
+      t.appendChild(th);
+    });
+  }
+
+  /* ---- Dropbox chooser ---- */
+  function loadDropbox(cb) {
+    if (window.Dropbox && window.Dropbox.choose) return cb();
+    if (!MEDIA.dropboxAppKey) { toast('Dropbox isn’t set up yet — add your app key in cms-schema.js.'); return; }
+    var s = document.getElementById('dropboxjs');
+    if (s) { s.addEventListener('load', cb); return; }
+    s = document.createElement('script'); s.id = 'dropboxjs'; s.src = 'https://www.dropbox.com/static/api/2/dropins.js';
+    s.setAttribute('data-app-key', MEDIA.dropboxAppKey);
+    s.onload = cb; s.onerror = function () { toast('Couldn’t load Dropbox.'); };
+    document.head.appendChild(s);
+  }
+  function chooseFromDropbox(fieldKey, previewEl, bulk) {
+    loadDropbox(function () {
+      window.Dropbox.choose({
+        linkType: 'direct', multiselect: !!bulk, extensions: ['.jpg', '.jpeg', '.png', '.webp', '.gif'],
+        success: function (files) {
+          files.forEach(function (fobj) {
+            fetch(fobj.link).then(function (r) { return r.blob(); }).then(function (blob) {
+              if (bulk) trayAddBlob(blob);
+              else stageFile(fieldKey, blob, previewEl, function () { toast('From Dropbox — hit Publish.'); });
+            }).catch(function () { toast('Couldn’t fetch that Dropbox file.'); });
+          });
+        }
+      });
+    });
+  }
+
+  /* ---- open / build the grid ---- */
+  function openMedia() {
+    mediaBody.innerHTML = '';
+    var zone = el('div', 'oe-bulk');
+    zone.innerHTML = '<span>⬆︎ Drop photos here to upload several at once</span>'
+      + (MEDIA.dropboxAppKey ? ' <button class="oe-b oe-ghost oe-dbx-bulk" type="button">Choose from Dropbox</button>' : '');
+    zone.addEventListener('dragover', function (ev) { ev.preventDefault(); zone.classList.add('oe-drop'); });
+    zone.addEventListener('dragleave', function () { zone.classList.remove('oe-drop'); });
+    zone.addEventListener('drop', function (ev) { ev.preventDefault(); zone.classList.remove('oe-drop'); var fs = ev.dataTransfer && ev.dataTransfer.files; if (fs) Array.prototype.forEach.call(fs, trayAddFile); });
+    mediaBody.appendChild(zone);
+    if (MEDIA.dropboxAppKey) zone.querySelector('.oe-dbx-bulk').addEventListener('click', function () { chooseFromDropbox(null, null, true); });
+
+    var trayEl = el('div', 'oe-tray'); mediaBody.appendChild(trayEl); renderTray();
+
+    var grid = el('div', 'oe-grid');
+    mediaTiles().forEach(function (t) {
+      var tile = el('div', 'oe-tile');
+      var src = tileSrc(t.url);
+      var ph = el('div', 'oe-tile-img' + (src ? '' : ' img-ph'));
+      if (src) ph.innerHTML = '<img src="' + src + '" alt="">';
+      var key = t.key;
+      attachDrop(ph, function () { return key; }, ph);
+      ph.addEventListener('click', function () { pickPhotoFor(key, ph); });
+      var lab = el('div', 'oe-tile-label'); lab.textContent = t.label;
+      var acts = el('div', 'oe-tile-acts');
+      if (MEDIA.dropboxAppKey) { var bDbx = el('button', 'oe-tb'); bDbx.type = 'button'; bDbx.textContent = 'Dropbox'; bDbx.addEventListener('click', function () { chooseFromDropbox(key, ph); }); acts.appendChild(bDbx); }
+      tile.appendChild(ph); tile.appendChild(lab); tile.appendChild(acts);
+      grid.appendChild(tile);
+    });
+    mediaBody.appendChild(grid);
+    mediaOverlay.classList.add('show');
+  }
+  function closeMedia() { mediaOverlay.classList.remove('show'); }
+
   /* ---------- wire up ---------- */
   launch.addEventListener('click', enter);
   pubBtn.addEventListener('click', publish);
+  bar.querySelector('.oe-photos').addEventListener('click', openMedia);
+
+  // Paste an image (Cmd+V) onto the last photo spot you hovered.
+  var lastImgSlot = null;
+  document.addEventListener('mouseover', function (e) {
+    if (!editing) return;
+    var s = e.target.closest && e.target.closest(IMG_SEL);
+    if (s && !s.closest('.oe-ui')) lastImgSlot = s;
+  });
+  document.addEventListener('paste', function (e) {
+    if (!editing) return;
+    var items = e.clipboardData && e.clipboardData.items; if (!items) return;
+    for (var i = 0; i < items.length; i++) {
+      if (items[i].type && items[i].type.indexOf('image') === 0) {
+        var f = items[i].getAsFile();
+        if (f && lastImgSlot) { e.preventDefault(); stageFile(imgInfo(lastImgSlot), f, lastImgSlot, function () { toast('Pasted photo staged — hit Publish.'); }); }
+        return;
+      }
+    }
+  });
   bar.querySelector('.oe-exit').addEventListener('click', function () {
     var pending = Object.keys(loadDraft()).length;
     if (pending && !window.confirm('You have ' + pending + ' unpublished change(s). Leave edit mode? (They’re kept until you publish or discard.)')) return;
