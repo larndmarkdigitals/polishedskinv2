@@ -204,16 +204,17 @@
       return '<div class="' + cls + (src ? '' : ' img-ph') + '"' + (path ? ' data-cms-img="' + path + '"' : '') + '>' + inner + t + '</div>';
     }
     function baPair(p) {
-      var gi = GBA.indexOf(p);
-      return '<div class="ba-pair reveal"><div class="bap-row">' +
-        photoSlot('bap-photo', p.before, 'Before', 'gallery.beforeAfter.' + gi + '.before') +
-        photoSlot('bap-photo', p.after, 'After', 'gallery.beforeAfter.' + gi + '.after') +
-        '</div><div class="bap-cap">' + (p.treatment || '') + '</div></div>';
+      var bb = 'gallery.beforeAfter.' + GBA.indexOf(p);
+      return '<div class="ba-pair reveal" data-cms-record="' + bb + '" data-cms-type="beforeAfter"><div class="bap-row">' +
+        photoSlot('bap-photo', p.before, 'Before', bb + '.before') +
+        photoSlot('bap-photo', p.after, 'After', bb + '.after') +
+        '</div><div class="bap-cap" data-cms="' + bb + '.treatment">' + (p.treatment || '') + '</div></div>';
     }
     function galItem(g) {
+      var gb = 'gallery.gallery.' + GAL.indexOf(g);
       var inner = g.img ? '<img loading="lazy" decoding="async" src="' + g.img + '" alt="' + (g.treatment || '') + '">' : SPARK;
-      return '<div class="gal-item reveal"><div class="gal-photo' + (g.img ? '' : ' img-ph') + '" data-cms-img="gallery.gallery.' + GAL.indexOf(g) + '.img">' + inner +
-        '</div><div class="gal-cap">' + (g.treatment || '') + '</div></div>';
+      return '<div class="gal-item reveal" data-cms-record="' + gb + '" data-cms-type="galleryPhoto"><div class="gal-photo' + (g.img ? '' : ' img-ph') + '" data-cms-img="' + gb + '.img">' + inner +
+        '</div><div class="gal-cap" data-cms="' + gb + '.treatment">' + (g.treatment || '') + '</div></div>';
     }
     set('ba-gallery', GBA.map(baPair).join(''));
     set('photo-gallery', GAL.map(galItem).join(''));

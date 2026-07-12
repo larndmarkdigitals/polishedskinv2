@@ -72,6 +72,20 @@ window.CMS_SCHEMA = {
     ]
   },
 
+  galleryPhoto: {
+    label: 'Photo',
+    fields: [
+      { key: 'treatment', label: 'Caption (words under the photo)', type: 'text' }
+    ]
+  },
+
+  beforeAfter: {
+    label: 'Before / After',
+    fields: [
+      { key: 'treatment', label: 'Caption', type: 'text' }
+    ]
+  },
+
   business: {
     label: 'Business info',
     fields: [

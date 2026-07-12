@@ -544,6 +544,8 @@
       if ('readTime' in item) item.readTime = item.readTime || '3 min read';
       if ('date' in item) { try { item.date = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }); } catch (e) { item.date = ''; } }
     }
+    if (type === 'galleryPhoto') item.img = item.img || '';
+    if (type === 'beforeAfter') { item.before = item.before || ''; item.after = item.after || ''; }
     return item;
   }
   // Structural changes reload the page (content.js re-renders from the staged
