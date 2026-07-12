@@ -323,6 +323,24 @@
     });
   }
 
+  // During an on-page edit session, overlay any staged collection arrays from
+  // the editor's draft (add/delete/reorder/record edits) so the page shows
+  // exactly what will be committed. Per-browser only (localStorage draft).
+  function applyDraftCollections() {
+    try {
+      if (!(String(location.hash).toLowerCase() === '#edit' || sessionStorage.getItem('pse-onpage-enabled') === '1')) return;
+      var draft = JSON.parse(localStorage.getItem('pse-oe-draft') || '{}');
+      var overlay = function (key, arr) {
+        if (Array.isArray(draft[key])) { arr.length = 0; draft[key].forEach(function (x) { arr.push(x); }); }
+      };
+      overlay('services.services', S);
+      overlay('reviews.reviews', R);
+      overlay('packages.packages', PK);
+      overlay('gallery.beforeAfter', GBA);
+      overlay('gallery.gallery', GAL);
+    } catch (e) {}
+  }
+
   function ready() {
     window.PSE_CONTENT_READY = true;
     document.dispatchEvent(new CustomEvent('pse:loaded'));
@@ -360,6 +378,7 @@
       treatments: res[3] || {}, packages: res[4] || {}, faq: res[5] || {},
       gallery: res[6] || {}, home: HOME, site: SITE, about: ABOUT
     };
+    applyDraftCollections();
     try { render(); } catch (e) { if (window.console) console.error('content render failed', e); }
     ready();
   });

@@ -68,12 +68,13 @@ exports.handler = async function (event) {
     }
   }
 
-  // Accept the widget value types the editor sends: text, numbers (stars),
-  // toggles (booleans), and lists (arrays of strings).
+  // Accept the value types the editor sends: text, numbers (stars), toggles
+  // (booleans), lists (arrays of strings) and whole collections (arrays of
+  // records/objects, for add/delete/reorder).
   const okValue = (v) => {
     const t = typeof v;
     if (t === 'string' || t === 'number' || t === 'boolean') return true;
-    return Array.isArray(v) && v.every((x) => typeof x === 'string');
+    return Array.isArray(v) && v.every((x) => typeof x === 'string' || (x && typeof x === 'object' && !Array.isArray(x)));
   };
 
   // Group edits by target file: { home: [[path,val],…], site: […] }

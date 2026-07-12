@@ -137,8 +137,30 @@
     return o;
   }
   function recordData(recordPath) { return resolvePath(window.CMS_DATA || {}, recordPath); }
+  // A record path ending in a number is a COLLECTION item (reviews.reviews.3);
+  // those are edited as the whole array so add/delete/reorder stay consistent.
+  function collParts(recordPath) {
+    var parts = recordPath.split('.');
+    if (!/^\d+$/.test(parts[parts.length - 1])) return null;
+    return { collPath: parts.slice(0, -1).join('.'), idx: +parts[parts.length - 1] };
+  }
+  function materialize(collPath) {
+    var d = loadDraft();
+    if (Array.isArray(d[collPath])) return d[collPath];
+    var committed = resolvePath(window.CMS_DATA || {}, collPath) || [];
+    return JSON.parse(JSON.stringify(committed));   // deep clone, don't touch committed data
+  }
+  function saveColl(collPath, arr) { var d = loadDraft(); d[collPath] = arr; saveDraft(d); refresh(); }
+
   function fieldValue(recordPath, field) {
     var draft = loadDraft();
+    var cp = collParts(recordPath);
+    if (cp) {
+      var arr = Array.isArray(draft[cp.collPath]) ? draft[cp.collPath] : (resolvePath(window.CMS_DATA || {}, cp.collPath) || []);
+      var rec0 = arr[cp.idx] || {};
+      var cv = rec0[field.key];
+      return cv == null ? field.default : cv;
+    }
     var rec = recordData(recordPath) || {};
     if (field.type === 'hours') {
       var hrs = rec[field.key] || [];
@@ -154,6 +176,13 @@
     return v == null ? field.default : v;
   }
   function setField(key, value) { var d = loadDraft(); d[key] = value; saveDraft(d); refresh(); }
+  // Route a record-field edit: collection item -> whole-array draft; single
+  // object (business) -> per-field path.
+  function setRecordField(recordPath, key, value) {
+    var cp = collParts(recordPath);
+    if (cp) { var arr = materialize(cp.collPath); if (arr[cp.idx]) { arr[cp.idx][key] = value; saveColl(cp.collPath, arr); } }
+    else setField(recordPath + '.' + key, value);
+  }
   function liveText(key, value) {
     Array.prototype.forEach.call(document.querySelectorAll('[data-cms="' + key + '"]'), function (n) { n.textContent = value; });
   }
@@ -176,6 +205,12 @@
     'body.oe-on .oe-record{outline:1.5px dashed rgba(176,125,74,.55);outline-offset:4px;border-radius:6px;cursor:pointer;transition:.15s;position:relative;}',
     'body.oe-on .oe-record:hover{outline:2px solid #b07d4a;background:rgba(176,125,74,.06);}',
     'body.oe-on .oe-record-changed{outline-color:#3a7d4a!important;}',
+    '.oe-rec-ctrls{position:absolute;top:6px;right:6px;z-index:7;display:flex;gap:4px;opacity:0;transition:.15s;}',
+    'body.oe-on .oe-record:hover .oe-rec-ctrls{opacity:1;}',
+    '.oe-rc{width:26px;height:26px;border:none;border-radius:6px;background:#16201f;color:#fff;cursor:pointer;font:13px/1 system-ui,sans-serif;box-shadow:0 2px 8px rgba(0,0,0,.2);}',
+    '.oe-rc:hover{background:#268b82;}.oe-rc-del:hover{background:#c0563f;}',
+    '.oe-add-rec{grid-column:1/-1;display:inline-flex;align-items:center;justify-content:center;margin:14px auto;padding:11px 22px;border:1.5px dashed #34b3a8;background:rgba(52,179,168,.08);color:#16201f;border-radius:10px;font:600 14px Jost,system-ui,sans-serif;cursor:pointer;}',
+    '.oe-add-rec:hover{background:rgba(52,179,168,.16);}',
     'body.oe-on .oe-md-block{outline:1.5px dashed rgba(52,179,168,.55);outline-offset:4px;border-radius:6px;cursor:pointer;transition:.15s;}',
     'body.oe-on .oe-md-block:hover{outline:2px solid #34b3a8;background:rgba(52,179,168,.06);}',
     'body.oe-on .oe-md-changed{outline-color:#3a7d4a!important;}',
@@ -280,7 +315,7 @@
     input.className = 'oe-input';
     var v = fieldValue(recordPath, field); input.value = v == null ? '' : v;
     input.addEventListener('input', function () {
-      setField(recordPath + '.' + field.key, input.value);
+      setRecordField(recordPath, field.key, input.value);
       liveText(recordPath + '.' + field.key, input.value);
     });
     return input;
@@ -292,7 +327,7 @@
     for (var k = 1; k <= 5; k++) (function (k) {
       var s = el('span', 'oe-star'); s.textContent = '★';
       s.addEventListener('click', function () {
-        paint(k); setField(recordPath + '.' + field.key, k);
+        paint(k); setRecordField(recordPath, field.key, k);
         var st2 = recordEl && recordEl.querySelector('.stars'); if (st2) st2.textContent = new Array(k + 1).join('★');
       });
       wrap.appendChild(s);
@@ -303,14 +338,14 @@
   function toggleWidget(recordPath, field) {
     var lab = el('label', 'oe-switch');
     var input = document.createElement('input'); input.type = 'checkbox'; input.checked = !!fieldValue(recordPath, field);
-    input.addEventListener('change', function () { setField(recordPath + '.' + field.key, input.checked); });
+    input.addEventListener('change', function () { setRecordField(recordPath, field.key, input.checked); });
     lab.appendChild(input); lab.appendChild(el('span', 'oe-slider'));
     return lab;
   }
   function listWidget(recordPath, field) {
     var wrap = el('div', 'oe-listw');
     var items = (fieldValue(recordPath, field) || []).slice();
-    function commit() { setField(recordPath + '.' + field.key, items.slice()); }
+    function commit() { setRecordField(recordPath, field.key, items.slice()); }
     function draw() {
       wrap.innerHTML = '';
       items.forEach(function (it, idx) {
@@ -399,6 +434,73 @@
     setTimeout(function () { ta.focus(); }, 260);
   }
 
+  /* ---------- collections: add / delete / reorder ---------- */
+  // A blank record built from the schema defaults, so a new item is editable.
+  function blankItem(type) {
+    var schema = (window.CMS_SCHEMA || {})[type] || { fields: [] };
+    var item = {};
+    schema.fields.forEach(function (f) {
+      item[f.key] = f.default != null ? f.default
+        : f.type === 'stars' ? 5 : f.type === 'toggle' ? false : f.type === 'list' ? [] : '';
+    });
+    if ('name' in item) item.name = 'New ' + String(schema.label || type).toLowerCase();
+    if (type === 'review' && 'text' in item) item.text = 'Write the review here.';
+    if (type === 'service') {
+      var cats = (window.CMS_DATA && window.CMS_DATA.services && window.CMS_DATA.services.categories) || [];
+      item.category = (cats[0] && cats[0].name) || '';
+    }
+    return item;
+  }
+  // Structural changes reload the page (content.js re-renders from the staged
+  // draft), which keeps DOM indices and the array perfectly in sync.
+  function reloadResuming() {
+    try { sessionStorage.setItem(ACTIVE_KEY, '1'); sessionStorage.setItem(ENABLED_KEY, '1'); } catch (e) {}
+    location.reload();
+  }
+  function collectionOp(collPath, idx, op) {
+    var arr = materialize(collPath);
+    if (op === 'del') { if (!window.confirm('Delete this item? It’s removed when you Publish.')) return; arr.splice(idx, 1); }
+    else if (op === 'up') { if (idx <= 0) return; var a = arr[idx - 1]; arr[idx - 1] = arr[idx]; arr[idx] = a; }
+    else if (op === 'down') { if (idx >= arr.length - 1) return; var b = arr[idx + 1]; arr[idx + 1] = arr[idx]; arr[idx] = b; }
+    else return;
+    saveColl(collPath, arr); reloadResuming();
+  }
+  function collectionAdd(collPath, type) {
+    var arr = materialize(collPath); arr.push(blankItem(type)); saveColl(collPath, arr); reloadResuming();
+  }
+  function stampCollections() {
+    var groups = {};
+    records().forEach(function (node) {
+      var cp = collParts(node.getAttribute('data-cms-record') || ''); if (!cp) return;
+      var type = node.getAttribute('data-cms-type');
+      (groups[cp.collPath] = groups[cp.collPath] || { type: type, nodes: [] }).nodes.push(node);
+      if (!node.querySelector(':scope > .oe-rec-ctrls')) {
+        var barc = el('div', 'oe-rec-ctrls oe-ui');
+        barc.innerHTML = '<button class="oe-rc" data-op="up" title="Move up">↑</button>'
+          + '<button class="oe-rc" data-op="down" title="Move down">↓</button>'
+          + '<button class="oe-rc oe-rc-del" data-op="del" title="Delete">✕</button>';
+        barc.addEventListener('click', function (ev) {
+          var b = ev.target.closest('button'); if (!b) return;
+          ev.preventDefault(); ev.stopPropagation();
+          collectionOp(cp.collPath, cp.idx, b.getAttribute('data-op'));
+        });
+        node.appendChild(barc);
+      }
+    });
+    Object.keys(groups).forEach(function (collPath) {
+      var g = groups[collPath], last = g.nodes[g.nodes.length - 1], parent = last.parentNode;
+      if (parent && !parent.querySelector(':scope > .oe-add-rec[data-coll="' + collPath + '"]')) {
+        var add = el('button', 'oe-add-rec oe-ui'); add.setAttribute('data-coll', collPath);
+        add.textContent = '＋ Add ' + String((window.CMS_SCHEMA[g.type] || {}).label || g.type);
+        add.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); collectionAdd(collPath, g.type); });
+        parent.insertBefore(add, last.nextSibling);
+      }
+    });
+  }
+  function unstampCollections() {
+    Array.prototype.forEach.call(document.querySelectorAll('.oe-rec-ctrls, .oe-add-rec'), function (n) { n.remove(); });
+  }
+
   /* ---------- enter / exit ---------- */
   function enter() {
     editing = true;
@@ -420,6 +522,7 @@
       e.classList.add('oe-img');
       if (!e.querySelector('.oe-img-cta')) { var cta = el('div', 'oe-img-cta'); cta.textContent = '📷 Change photo'; e.appendChild(cta); }
     });
+    stampCollections();
     launch.hidden = true; bar.hidden = false;
     refresh();
   }
@@ -437,6 +540,7 @@
     records().forEach(function (e) { e.classList.remove('oe-record', 'oe-record-changed'); });
     mdBlocks().forEach(function (e) { e.classList.remove('oe-md-block', 'oe-md-changed'); });
     imgSlots().forEach(function (e) { e.classList.remove('oe-img', 'oe-img-changed'); var c = e.querySelector('.oe-img-cta'); if (c) c.remove(); });
+    unstampCollections();
     launch.hidden = false; bar.hidden = true;
   }
   function singleLineKeys(e) { if (e.key === 'Enter') { e.preventDefault(); e.target.blur(); } }
@@ -488,10 +592,8 @@
   });
   bar.querySelector('.oe-discard').addEventListener('click', function () {
     if (!window.confirm('Discard ALL unpublished changes (every page)?')) return;
-    var draft = loadDraft();
     clearDraft();
-    fields().forEach(function (e) { var f = info(e); if (f && orig[f.key] != null) writeEl(e, orig[f.key], f.multi); });
-    closePanel(); refresh();
+    location.reload();
   });
 
   // One capture-phase click handler while editing: records open the panel;
