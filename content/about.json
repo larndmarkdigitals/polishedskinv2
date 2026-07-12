@@ -1,5 +1,5 @@
 {
-  "clinicPhoto": "",
+  "clinicPhoto": "img/oe-1783870668857-c49ra.jpg",
   "hero": {
     "heading": "About",
     "headingAccent": "Polished Skin",
@@ -15,9 +15,18 @@
     "eyebrow": "The Polished Skin Way",
     "heading": "What you can expect",
     "cards": [
-      { "title": "A real consultation", "text": "We start by understanding your skin and goals — so your treatment is built for you, not a template." },
-      { "title": "A calm experience", "text": "A clean, welcoming clinic where you can fully relax. No rush, no pressure — just expert care." },
-      { "title": "Results you'll see", "text": "Honest advice and effective treatments that leave your skin healthier every single visit." }
+      {
+        "title": "A real consultation",
+        "text": "We start by understanding your skin and goals — so your treatment is built for you, not a template."
+      },
+      {
+        "title": "A calm experience",
+        "text": "A clean, welcoming clinic where you can fully relax. No rush, no pressure — just expert care."
+      },
+      {
+        "title": "Results you'll see",
+        "text": "Honest advice and effective treatments that leave your skin healthier every single visit."
+      }
     ]
   },
   "esthetician": {
