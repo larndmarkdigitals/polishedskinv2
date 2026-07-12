@@ -83,14 +83,15 @@ window.CMS_SCHEMA = {
    ============================================================ */
 window.CMS_MEDIA = {
   dropboxAppKey: '',
+  // aspect = frame width/height, used by the crop tool (matches the CSS frames).
   fields: [
-    { key: 'home.hero.img',      label: 'Homepage — hero photo' },
-    { key: 'home.about.img',     label: 'Homepage — clinic photo' },
-    { key: 'about.clinicPhoto',  label: 'About page — clinic photo' },
-    { collection: 'services.services',     imgKey: 'img', label: 'Service: {name}' },
-    { collection: 'treatments.treatments', imgKey: 'img', label: 'Treatment: {name}' },
-    { collection: 'posts.posts',           imgKey: 'img', label: 'Blog: {title}' },
-    { collection: 'gallery.gallery',       imgKey: 'img', label: 'Gallery #{n}' },
-    { pairCollection: 'gallery.beforeAfter', keys: ['before', 'after'], label: 'Before/After #{n}' }
+    { key: 'home.hero.img',      label: 'Homepage — hero photo', aspect: 4 / 5 },
+    { key: 'home.about.img',     label: 'Homepage — clinic photo', aspect: 4 / 5 },
+    { key: 'about.clinicPhoto',  label: 'About page — clinic photo', aspect: 4 / 5 },
+    { collection: 'services.services',     imgKey: 'img', label: 'Service: {name}', aspect: 3 / 2 },
+    { collection: 'treatments.treatments', imgKey: 'img', label: 'Treatment: {name}', aspect: 2 / 1 },
+    { collection: 'posts.posts',           imgKey: 'img', label: 'Blog: {title}', aspect: 16 / 10 },
+    { collection: 'gallery.gallery',       imgKey: 'img', label: 'Gallery #{n}', aspect: 1 },
+    { pairCollection: 'gallery.beforeAfter', keys: ['before', 'after'], label: 'Before/After #{n}', aspect: 3 / 4 }
   ]
 };

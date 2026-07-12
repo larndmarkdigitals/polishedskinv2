@@ -266,6 +266,18 @@
     '.oe-tile-acts{padding:0 12px 11px;display:flex;gap:6px;}',
     '.oe-tb{border:1px solid #ddd0be;background:#faf6f0;color:#6f5b48;border-radius:7px;padding:5px 10px;font:600 12px Jost,system-ui,sans-serif;cursor:pointer;}',
     '.oe-tb:hover{background:#f2ece3;}',
+    '.oe-crop-btn{position:absolute;top:6px;left:6px;z-index:6;border:none;width:30px;height:30px;border-radius:8px;background:rgba(22,32,31,.72);cursor:pointer;font-size:15px;line-height:1;opacity:0;transition:.15s;}',
+    'body.oe-on .oe-img:hover .oe-crop-btn{opacity:1;}',
+    '.oe-crop-btn:hover{background:#268b82;}',
+    '.oe-crop{position:fixed;inset:0;z-index:10004;background:rgba(20,32,31,.72);display:none;align-items:center;justify-content:center;}',
+    '.oe-crop.show{display:flex;}',
+    '.oe-crop-box{background:#fff;border-radius:14px;padding:18px;box-shadow:0 20px 60px rgba(0,0,0,.4);max-width:94vw;}',
+    '.oe-crop-title{font:600 14px Jost,system-ui,sans-serif;color:#2c2019;margin-bottom:12px;}',
+    '.oe-crop-title span{font-weight:400;color:#9a8873;font-size:12.5px;}',
+    '.oe-crop-frame{position:relative;overflow:hidden;background:#efe4d4;border-radius:8px;cursor:grab;touch-action:none;}',
+    '.oe-crop-img{position:absolute;top:0;left:0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none;}',
+    '.oe-crop-zoom{display:block;width:100%;margin:14px 0;accent-color:#34b3a8;}',
+    '.oe-crop-acts{display:flex;gap:10px;justify-content:flex-end;}',
     '.oe-md-ta{min-height:280px;font:13.5px/1.6 ui-monospace,Menlo,monospace;}',
     'body.oe-on .oe-changed{outline-color:#3a7d4a!important;background:rgba(58,125,74,.09)!important;}',
     /* panel */
@@ -581,6 +593,11 @@
     imgSlots().forEach(function (e) {
       e.classList.add('oe-img');
       if (!e.querySelector('.oe-img-cta')) { var cta = el('div', 'oe-img-cta'); cta.textContent = '📷 Click or drop a photo'; e.appendChild(cta); }
+      if (!e.querySelector('.oe-crop-btn')) {
+        var cb = el('button', 'oe-ui oe-crop-btn'); cb.type = 'button'; cb.textContent = '✂️'; cb.title = 'Adjust crop';
+        (function (slot) { cb.addEventListener('click', function (ev) { ev.preventDefault(); ev.stopPropagation(); openCrop(imgInfo(slot), slot.offsetWidth / slot.offsetHeight, slot); }); })(e);
+        e.appendChild(cb);
+      }
       if (!e._oeDrop) { e._oeDrop = true; attachDrop(e, (function (slot) { return function () { return imgInfo(slot); }; })(e), e); }
     });
     stampCollections();
@@ -600,7 +617,7 @@
     });
     records().forEach(function (e) { e.classList.remove('oe-record', 'oe-record-changed'); });
     mdBlocks().forEach(function (e) { e.classList.remove('oe-md-block', 'oe-md-changed'); });
-    imgSlots().forEach(function (e) { e.classList.remove('oe-img', 'oe-img-changed'); var c = e.querySelector('.oe-img-cta'); if (c) c.remove(); });
+    imgSlots().forEach(function (e) { e.classList.remove('oe-img', 'oe-img-changed'); var c = e.querySelector('.oe-img-cta'); if (c) c.remove(); var cb = e.querySelector('.oe-crop-btn'); if (cb) cb.remove(); });
     unstampCollections();
     launch.hidden = false; bar.hidden = true;
   }
@@ -758,6 +775,7 @@
       var lab = el('div', 'oe-tile-label'); lab.textContent = t.label;
       var acts = el('div', 'oe-tile-acts');
       if (MEDIA.dropboxAppKey) { var bDbx = el('button', 'oe-tb'); bDbx.type = 'button'; bDbx.textContent = 'Dropbox'; bDbx.addEventListener('click', function () { chooseFromDropbox(key, ph); }); acts.appendChild(bDbx); }
+      var bCrop = el('button', 'oe-tb'); bCrop.type = 'button'; bCrop.textContent = '✂️ Crop'; (function (kk, pp) { bCrop.addEventListener('click', function () { openCrop(kk, aspectFor(kk), pp); }); })(key, ph); acts.appendChild(bCrop);
       tile.appendChild(ph); tile.appendChild(lab); tile.appendChild(acts);
       grid.appendChild(tile);
     });
@@ -765,6 +783,91 @@
     mediaOverlay.classList.add('show');
   }
   function closeMedia() { mediaOverlay.classList.remove('show'); }
+
+  /* ---------- crop tool (pan + zoom -> canvas crop to the frame) ---------- */
+  function imgSrcFor(fieldKey) {
+    var d = loadDraft();
+    var p = d[fieldKey] != null ? d[fieldKey] : resolvePath(window.CMS_DATA || {}, fieldKey);
+    if (!p) return null;
+    return d['__img:' + p] ? 'data:image/jpeg;base64,' + d['__img:' + p] : p;
+  }
+  function aspectFor(fieldKey) {
+    var a = null;
+    (MEDIA.fields || []).forEach(function (f) {
+      if (f.key === fieldKey) a = f.aspect;
+      else if (f.collection && fieldKey.indexOf(f.collection + '.') === 0) a = f.aspect;
+      else if (f.pairCollection && fieldKey.indexOf(f.pairCollection + '.') === 0) a = f.aspect;
+    });
+    return a || 1.5;
+  }
+
+  var cropOverlay = el('div', 'oe-ui oe-crop');
+  cropOverlay.innerHTML =
+    '<div class="oe-crop-box">' +
+      '<div class="oe-crop-title">Adjust crop <span>— drag the photo to move, slider to zoom</span></div>' +
+      '<div class="oe-crop-frame"><img class="oe-crop-img" alt=""></div>' +
+      '<input type="range" class="oe-crop-zoom" min="1" max="3.5" step="0.01" value="1">' +
+      '<div class="oe-crop-acts"><button class="oe-b oe-ghost oe-crop-cancel" type="button">Cancel</button><button class="oe-b oe-pub oe-crop-save" type="button">Use this crop</button></div>' +
+    '</div>';
+  document.body.appendChild(cropOverlay);
+  var cropFrame = cropOverlay.querySelector('.oe-crop-frame');
+  var cropImgEl = cropOverlay.querySelector('.oe-crop-img');
+  var cropZoom = cropOverlay.querySelector('.oe-crop-zoom');
+  var cropState = null, cropDrag = null;
+
+  function applyCrop() {
+    var s = cropState; if (!s) return;
+    s.tx = Math.min(0, Math.max(s.fw - s.iw * s.scale, s.tx));
+    s.ty = Math.min(0, Math.max(s.fh - s.ih * s.scale, s.ty));
+    cropImgEl.style.width = (s.iw * s.scale) + 'px';
+    cropImgEl.style.height = (s.ih * s.scale) + 'px';
+    cropImgEl.style.transform = 'translate(' + s.tx + 'px,' + s.ty + 'px)';
+  }
+  function openCrop(fieldKey, aspect, previewEl) {
+    var src = imgSrcFor(fieldKey);
+    if (!src) { toast('Add a photo here first, then adjust its crop.'); return; }
+    aspect = aspect || aspectFor(fieldKey);
+    var img = new Image();
+    img.onload = function () {
+      var iw = img.naturalWidth, ih = img.naturalHeight;
+      var maxW = Math.min(560, window.innerWidth - 60), maxH = window.innerHeight - 230;
+      var fw = maxW, fh = fw / aspect; if (fh > maxH) { fh = maxH; fw = fh * aspect; }
+      var minScale = Math.max(fw / iw, fh / ih);
+      cropFrame.style.width = fw + 'px'; cropFrame.style.height = fh + 'px';
+      cropImgEl.src = src; cropZoom.value = 1;
+      cropState = { fieldKey: fieldKey, previewEl: previewEl, img: img, iw: iw, ih: ih, fw: fw, fh: fh, minScale: minScale, scale: minScale, tx: (fw - iw * minScale) / 2, ty: (fh - ih * minScale) / 2 };
+      applyCrop(); cropOverlay.classList.add('show');
+    };
+    img.onerror = function () { toast('Couldn’t load that image to crop.'); };
+    img.src = src;
+  }
+  function closeCrop() { cropOverlay.classList.remove('show'); cropState = null; cropDrag = null; }
+
+  cropZoom.addEventListener('input', function () {
+    var s = cropState; if (!s) return;
+    var cx = s.fw / 2, cy = s.fh / 2, old = s.scale;
+    s.scale = s.minScale * parseFloat(cropZoom.value);
+    s.tx = cx - (cx - s.tx) * (s.scale / old); s.ty = cy - (cy - s.ty) * (s.scale / old);
+    applyCrop();
+  });
+  cropFrame.addEventListener('mousedown', function (e) { if (!cropState) return; cropDrag = { x: e.clientX, y: e.clientY, tx: cropState.tx, ty: cropState.ty }; e.preventDefault(); });
+  document.addEventListener('mousemove', function (e) { if (!cropDrag || !cropState) return; cropState.tx = cropDrag.tx + (e.clientX - cropDrag.x); cropState.ty = cropDrag.ty + (e.clientY - cropDrag.y); applyCrop(); });
+  document.addEventListener('mouseup', function () { cropDrag = null; });
+  cropFrame.addEventListener('touchstart', function (e) { if (!cropState || !e.touches[0]) return; cropDrag = { x: e.touches[0].clientX, y: e.touches[0].clientY, tx: cropState.tx, ty: cropState.ty }; });
+  cropFrame.addEventListener('touchmove', function (e) { if (!cropDrag || !cropState || !e.touches[0]) return; e.preventDefault(); cropState.tx = cropDrag.tx + (e.touches[0].clientX - cropDrag.x); cropState.ty = cropDrag.ty + (e.touches[0].clientY - cropDrag.y); applyCrop(); }, { passive: false });
+  document.addEventListener('touchend', function () { cropDrag = null; });
+  cropOverlay.querySelector('.oe-crop-cancel').addEventListener('click', closeCrop);
+  cropOverlay.querySelector('.oe-crop-save').addEventListener('click', function () {
+    var s = cropState; if (!s) return;
+    var TW = 1200, TH = Math.round(TW * s.fh / s.fw);
+    var sx = -s.tx / s.scale, sy = -s.ty / s.scale, sw = s.fw / s.scale, sh = s.fh / s.scale;
+    var c = document.createElement('canvas'); c.width = TW; c.height = TH;
+    try {
+      c.getContext('2d').drawImage(s.img, sx, sy, sw, sh, 0, 0, TW, TH);
+      stageImage(s.fieldKey, c.toDataURL('image/jpeg', 0.85), s.previewEl);
+      closeCrop(); toast('Cropped — hit Publish to save it.');
+    } catch (e) { toast('Couldn’t process that image.'); }
+  });
 
   /* ---------- wire up ---------- */
   launch.addEventListener('click', enter);

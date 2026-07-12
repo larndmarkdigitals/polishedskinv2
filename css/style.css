@@ -158,8 +158,9 @@ section{ padding:96px 0; }
 }
 .img-ph svg{ width:46px; height:46px; opacity:.5; }
 .img-ph .ph-label{ position:absolute; bottom:10px; font-family:var(--font-head); font-size:11px; letter-spacing:.12em; text-transform:uppercase; color:var(--teal-d); opacity:.6; }
-/* uploaded photos injected into hero/about boxes fill the frame */
-.hero-photo>img, .about-img>img{ width:100%; height:100%; object-fit:cover; display:block; }
+/* uploaded photos injected into any image frame fill it (fixed aspect, cover) */
+.hero-photo>img, .about-img>img, .svc-img img, .post-img img, .t-hero-img>img{ width:100%; height:100%; object-fit:cover; display:block; }
+.svc-img, .post-img{ overflow:hidden; }
 
 /* ---------- Trust strip ---------- */
 .trust{ background:var(--ink); padding:30px 0; }
