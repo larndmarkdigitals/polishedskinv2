@@ -548,15 +548,27 @@
   }
 
   /* ---------- enter / exit ---------- */
+  // Record the committed (published) value of each inline field. Runs at boot,
+  // BEFORE any draft is painted on, so it's a true baseline for change detection.
+  function captureBaseline() {
+    fields().forEach(function (e) { var f = info(e); if (f) orig[f.key] = readEl(e, f.multi); });
+  }
+  // Paint staged (unpublished) edits onto the page even when NOT in edit mode, so
+  // a draft survives Done + refresh + navigation. (Collections are handled by
+  // content.js's overlay; this covers inline text, markdown blocks and photos.)
+  function applyDraftPreview() {
+    var draft = loadDraft();
+    fields().forEach(function (e) { var f = info(e); if (f && draft[f.key] != null) writeEl(e, draft[f.key], f.multi); });
+    mdBlocks().forEach(function (e) { var k = mdInfo(e); if (k && draft[k] != null) e.innerHTML = window.PSE_md ? window.PSE_md(draft[k]) : draft[k]; });
+    imgSlots().forEach(function (e) { var k = imgInfo(e), p = k && draft[k]; if (p && draft['__img:' + p] != null) setImgPreview(e, 'data:image/jpeg;base64,' + draft['__img:' + p]); });
+  }
+
   function enter() {
     editing = true;
     try { sessionStorage.setItem(ACTIVE_KEY, '1'); } catch (e) {}
     document.body.classList.add('oe-on');
-    var draft = loadDraft();
     fields().forEach(function (e) {
       var f = info(e); if (!f) return;
-      orig[f.key] = readEl(e, f.multi);
-      if (draft[f.key] != null) writeEl(e, draft[f.key], f.multi);
       e.classList.add('oe-inline');
       e.setAttribute('contenteditable', f.multi ? 'true' : 'plaintext-only');
       e.addEventListener('input', refresh);
@@ -809,6 +821,8 @@
   }
   function boot() {
     if (!editModeRequested()) return;
+    captureBaseline();     // baseline from the committed render
+    applyDraftPreview();   // then show any unpublished draft (survives Done + refresh)
     launch.hidden = false;
     var active = false; try { active = sessionStorage.getItem(ACTIVE_KEY) === '1'; } catch (e) {}
     if (active) enter();
