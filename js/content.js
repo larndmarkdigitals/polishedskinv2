@@ -64,13 +64,14 @@
   }
 
   function postCard(p) {
+    var pi = P.indexOf(p), pb = 'posts.posts.' + pi + '.';
     var img = p.img
-      ? '<div class="post-img"><img loading="lazy" decoding="async" src="' + p.img + '" alt=""></div>'
-      : '<div class="post-img img-ph">' + SPARK + '</div>';
+      ? '<div class="post-img" data-cms-img="' + pb + 'img"><img loading="lazy" decoding="async" src="' + p.img + '" alt=""></div>'
+      : '<div class="post-img img-ph" data-cms-img="' + pb + 'img">' + SPARK + '</div>';
     var meta = (p.date ? p.date + ' · ' : '') + (p.readTime || '');
-    return '<a class="post-card reveal" href="post.html?slug=' + encodeURIComponent(p.slug) + '">' +
-      img + '<div class="post-body"><div class="post-tag">' + p.tag + '</div>' +
-      '<h3>' + p.title + '</h3><p>' + p.excerpt + '</p>' +
+    return '<a class="post-card reveal" href="post.html?slug=' + encodeURIComponent(p.slug) + '" data-cms-record="posts.posts.' + pi + '" data-cms-type="post">' +
+      img + '<div class="post-body"><div class="post-tag" data-cms="' + pb + 'tag">' + p.tag + '</div>' +
+      '<h3 data-cms="' + pb + 'title">' + p.title + '</h3><p data-cms="' + pb + 'excerpt">' + p.excerpt + '</p>' +
       '<div class="post-meta">' + meta + '</div></div></a>';
   }
 
@@ -336,6 +337,7 @@
       overlay('services.services', S);
       overlay('reviews.reviews', R);
       overlay('packages.packages', PK);
+      overlay('posts.posts', P);
       overlay('gallery.beforeAfter', GBA);
       overlay('gallery.gallery', GAL);
     } catch (e) {}

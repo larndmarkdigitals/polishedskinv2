@@ -115,11 +115,13 @@
     if (!fieldKey) return false;
     var b64 = (String(dataUrl).split(',')[1]) || '';
     var fname = newImgName();
+    var prev = getFieldSmart(fieldKey);
     var d = loadDraft();
-    var prev = d[fieldKey]; if (prev && d['__img:' + prev] != null) delete d['__img:' + prev];
-    d[fieldKey] = fname; d['__img:' + fname] = b64;
+    if (prev && d['__img:' + prev] != null) delete d['__img:' + prev];
+    d['__img:' + fname] = b64;
     try { localStorage.setItem(DRAFT_KEY, JSON.stringify(d)); }
     catch (e) { toast('That image is too large to stage — try a smaller photo, or Publish first.'); return false; }
+    setFieldSmart(fieldKey, fname);   // path -> whole-array for collections, else per-field
     if (previewEl) setImgPreview(previewEl, dataUrl);
     imgSlots().forEach(function (s) { if (imgInfo(s) === fieldKey) setImgPreview(s, dataUrl); });
     refresh();
@@ -199,13 +201,39 @@
     return v == null ? field.default : v;
   }
   function setField(key, value) { var d = loadDraft(); d[key] = value; saveDraft(d); refresh(); }
-  // Route a record-field edit: collection item -> whole-array draft; single
-  // object (business) -> per-field path.
-  function setRecordField(recordPath, key, value) {
-    var cp = collParts(recordPath);
-    if (cp) { var arr = materialize(cp.collPath); if (arr[cp.idx]) { arr[cp.idx][key] = value; saveColl(cp.collPath, arr); } }
-    else setField(recordPath + '.' + key, value);
+
+  // Managed collections are edited as WHOLE arrays so add/delete/reorder stay
+  // consistent. A key like reviews.reviews.3.text or posts.posts.3.body is routed
+  // into the array; anything else (home.hero.title, business.hours…) is a plain
+  // per-field draft entry.
+  var MANAGED_COLLS = ['reviews.reviews', 'services.services', 'packages.packages', 'posts.posts', 'gallery.gallery', 'gallery.beforeAfter'];
+  function splitColl(key) {
+    var parts = key.split('.');
+    for (var i = parts.length - 1; i >= 0; i--) {
+      if (/^\d+$/.test(parts[i])) {
+        var collPath = parts.slice(0, i).join('.');
+        return MANAGED_COLLS.indexOf(collPath) >= 0 ? { collPath: collPath, idx: +parts[i], sub: parts.slice(i + 1) } : null;
+      }
+    }
+    return null;
   }
+  function setFieldSmart(key, value) {
+    var sc = splitColl(key);
+    if (!sc || !sc.sub.length) { setField(key, value); return; }
+    var arr = materialize(sc.collPath), o = arr[sc.idx]; if (!o) return;
+    for (var i = 0; i < sc.sub.length - 1; i++) { if (o[sc.sub[i]] == null) o[sc.sub[i]] = {}; o = o[sc.sub[i]]; }
+    o[sc.sub[sc.sub.length - 1]] = value; saveColl(sc.collPath, arr);
+  }
+  function getFieldSmart(key) {
+    var sc = splitColl(key), d = loadDraft();
+    if (sc) {
+      var arr = Array.isArray(d[sc.collPath]) ? d[sc.collPath] : (resolvePath(window.CMS_DATA || {}, sc.collPath) || []);
+      var o = arr[sc.idx]; for (var i = 0; i < sc.sub.length && o != null; i++) o = o[sc.sub[i]];
+      return o;
+    }
+    return d[key] != null ? d[key] : resolvePath(window.CMS_DATA || {}, key);
+  }
+  function setRecordField(recordPath, key, value) { setFieldSmart(recordPath + '.' + key, value); }
   function liveText(key, value) {
     Array.prototype.forEach.call(document.querySelectorAll('[data-cms="' + key + '"]'), function (n) { n.textContent = value; });
   }
@@ -476,9 +504,7 @@
   // Edit a larger text passage as its Markdown source. Live-renders as you type.
   function openMdPanel(elm) {
     var key = mdInfo(elm); if (key == null) return;
-    var draft = loadDraft();
-    var raw = draft[key] != null ? draft[key] : resolvePath(window.CMS_DATA || {}, key);
-    raw = raw == null ? '' : String(raw);
+    var raw = getFieldSmart(key); raw = raw == null ? '' : String(raw);
     panelTitle.textContent = 'Edit text';
     panelBody.innerHTML = '';
     var note = el('p', 'oe-hint2');
@@ -486,7 +512,7 @@
     panelBody.appendChild(note);
     var ta = el('textarea', 'oe-input oe-md-ta'); ta.value = raw;
     ta.addEventListener('input', function () {
-      setField(key, ta.value);
+      setFieldSmart(key, ta.value);
       elm.innerHTML = window.PSE_md ? window.PSE_md(ta.value) : ta.value;
     });
     panelBody.appendChild(ta);
@@ -508,6 +534,15 @@
     if (type === 'service') {
       var cats = (window.CMS_DATA && window.CMS_DATA.services && window.CMS_DATA.services.categories) || [];
       item.category = (cats[0] && cats[0].name) || '';
+    }
+    if (type === 'post') {
+      item.title = 'New blog post';
+      item.slug = 'post-' + Date.now().toString(36);   // unique URL slug
+      if ('tag' in item) item.tag = item.tag || 'Skincare';
+      if ('excerpt' in item) item.excerpt = item.excerpt || 'A short summary shown on the blog list.';
+      if ('body' in item) item.body = item.body || 'Write your post here. **Markdown** is supported.';
+      if ('readTime' in item) item.readTime = item.readTime || '3 min read';
+      if ('date' in item) { try { item.date = new Date().toLocaleString('en-US', { month: 'long', year: 'numeric' }); } catch (e) { item.date = ''; } }
     }
     return item;
   }
@@ -574,7 +609,7 @@
     var draft = loadDraft();
     fields().forEach(function (e) { var f = info(e); if (f && draft[f.key] != null) writeEl(e, draft[f.key], f.multi); });
     mdBlocks().forEach(function (e) { var k = mdInfo(e); if (k && draft[k] != null) e.innerHTML = window.PSE_md ? window.PSE_md(draft[k]) : draft[k]; });
-    imgSlots().forEach(function (e) { var k = imgInfo(e), p = k && draft[k]; if (p && draft['__img:' + p] != null) setImgPreview(e, 'data:image/jpeg;base64,' + draft['__img:' + p]); });
+    imgSlots().forEach(function (e) { var k = imgInfo(e), p = k && getFieldSmart(k); if (p && draft['__img:' + p] != null) setImgPreview(e, 'data:image/jpeg;base64,' + draft['__img:' + p]); });
   }
 
   function enter() {
@@ -671,7 +706,7 @@
   mediaOverlay.querySelector('.oe-close').addEventListener('click', closeMedia);
 
   function draftArr(collPath, data) { var d = loadDraft(); return Array.isArray(d[collPath]) ? d[collPath] : (resolvePath(data, collPath) || []); }
-  function curImg(fieldKey, data) { var d = loadDraft(); return d[fieldKey] != null ? d[fieldKey] : resolvePath(data, fieldKey); }
+  function curImg(fieldKey) { return getFieldSmart(fieldKey); }
   function tileSrc(url) { var d = loadDraft(); return (url && d['__img:' + url]) ? 'data:image/jpeg;base64,' + d['__img:' + url] : (url || ''); }
 
   function mediaTiles() {
@@ -786,9 +821,8 @@
 
   /* ---------- crop tool (pan + zoom -> canvas crop to the frame) ---------- */
   function imgSrcFor(fieldKey) {
+    var p = getFieldSmart(fieldKey); if (!p) return null;
     var d = loadDraft();
-    var p = d[fieldKey] != null ? d[fieldKey] : resolvePath(window.CMS_DATA || {}, fieldKey);
-    if (!p) return null;
     return d['__img:' + p] ? 'data:image/jpeg;base64,' + d['__img:' + p] : p;
   }
   function aspectFor(fieldKey) {

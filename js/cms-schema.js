@@ -59,6 +59,19 @@ window.CMS_SCHEMA = {
     ]
   },
 
+  post: {
+    label: 'Blog post',
+    fields: [
+      { key: 'title',    label: 'Title',               type: 'text' },
+      { key: 'tag',      label: 'Tag / category',      type: 'text' },
+      { key: 'excerpt',  label: 'Excerpt (blog card)', type: 'textarea' },
+      { key: 'body',     label: 'Body (Markdown)',     type: 'textarea' },
+      { key: 'date',     label: 'Date',                type: 'text' },
+      { key: 'readTime', label: 'Read time',           type: 'text' },
+      { key: 'slug',     label: 'URL slug (web address)', type: 'text' }
+    ]
+  },
+
   business: {
     label: 'Business info',
     fields: [
