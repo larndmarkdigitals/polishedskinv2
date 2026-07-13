@@ -206,7 +206,10 @@
   // consistent. A key like reviews.reviews.3.text or posts.posts.3.body is routed
   // into the array; anything else (home.hero.title, business.hours…) is a plain
   // per-field draft entry.
-  var MANAGED_COLLS = ['reviews.reviews', 'services.services', 'packages.packages', 'posts.posts', 'gallery.gallery', 'gallery.beforeAfter'];
+  // Collections edited as whole arrays (add/delete/reorder). Per-site: set
+  // window.CMS_COLLECTIONS in cms-schema.js. Falls back to a sensible default.
+  var MANAGED_COLLS = (window.CMS_COLLECTIONS && window.CMS_COLLECTIONS.length) ? window.CMS_COLLECTIONS
+    : ['reviews.reviews', 'services.services', 'packages.packages', 'posts.posts', 'gallery.gallery', 'gallery.beforeAfter'];
   function splitColl(key) {
     var parts = key.split('.');
     for (var i = parts.length - 1; i >= 0; i--) {

@@ -122,3 +122,17 @@ window.CMS_MEDIA = {
     { pairCollection: 'gallery.beforeAfter', keys: ['before', 'after'], label: 'Before/After #{n}', aspect: 3 / 4 }
   ]
 };
+
+/* ============================================================
+   CMS_COLLECTIONS — the JSON array paths that support add / delete / reorder
+   (edited as whole arrays). Must match the data-cms-record paths your
+   content.js stamps AND the arrays your applyDraftCollections() overlays.
+   ============================================================ */
+window.CMS_COLLECTIONS = [
+  'reviews.reviews',
+  'services.services',
+  'packages.packages',
+  'posts.posts',
+  'gallery.gallery',
+  'gallery.beforeAfter'
+];
