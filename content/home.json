@@ -138,13 +138,27 @@
     "headingAccent": "your results",
     "intro": "We partner with professional-grade skincare lines and technologies we trust.",
     "items": [
-      "Skin Script",
-      "XO8 Cosmeceuticals",
-      "BioSkin",
-      "Glo2Facial",
-      "Jet Plasma",
-      "ProCell Microchanneling",
-      "Celluma"
+      {
+        "name": "Skin Script"
+      },
+      {
+        "name": "XO8 Cosmeceuticals"
+      },
+      {
+        "name": "BioSkin"
+      },
+      {
+        "name": "Glo2Facial"
+      },
+      {
+        "name": "Jet Plasma"
+      },
+      {
+        "name": "ProCell Microchanneling"
+      },
+      {
+        "name": "Celluma"
+      }
     ]
   }
 }

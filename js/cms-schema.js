@@ -86,6 +86,13 @@ window.CMS_SCHEMA = {
     ]
   },
 
+  partner: {
+    label: 'Partner brand',
+    fields: [
+      { key: 'name', label: 'Brand name', type: 'text' }
+    ]
+  },
+
   business: {
     label: 'Business info',
     fields: [
@@ -134,5 +141,6 @@ window.CMS_COLLECTIONS = [
   'packages.packages',
   'posts.posts',
   'gallery.gallery',
-  'gallery.beforeAfter'
+  'gallery.beforeAfter',
+  'home.partners.items'
 ];

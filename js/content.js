@@ -166,10 +166,11 @@
     if (!featSvc.length) featSvc = S;
     set('home-services', featSvc.slice(0, 4).map(svcCard).join(''));
 
-    /* ---- HOME: partner brands ---- */
+    /* ---- partner brands (home + about) ---- */
     if (document.getElementById('partners-list') && HOME.partners) {
-      set('partners-list', (HOME.partners.items || []).map(function (name, i) {
-        return '<div class="partner-chip" data-cms="home.partners.items.' + i + '">' + name + '</div>';
+      set('partners-list', (HOME.partners.items || []).map(function (item, i) {
+        var b = 'home.partners.items.' + i;
+        return '<div class="partner-chip" data-cms-record="' + b + '" data-cms-type="partner"><span data-cms="' + b + '.name">' + (item.name || '') + '</span></div>';
       }).join(''));
     }
 
@@ -348,6 +349,7 @@
       overlay('posts.posts', P);
       overlay('gallery.beforeAfter', GBA);
       overlay('gallery.gallery', GAL);
+      if (HOME && HOME.partners && Array.isArray(HOME.partners.items)) overlay('home.partners.items', HOME.partners.items);
     } catch (e) {}
   }
 
