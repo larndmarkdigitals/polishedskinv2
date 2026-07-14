@@ -131,5 +131,20 @@
     "headingAccent": "glow?",
     "text": "Book online in under a minute. New clients always welcome.",
     "button": "Book Your Appointment"
+  },
+  "partners": {
+    "eyebrow": "Trusted Brands",
+    "heading": "The brands behind",
+    "headingAccent": "your results",
+    "intro": "We partner with professional-grade skincare lines and technologies we trust.",
+    "items": [
+      "Skin Script",
+      "XO8 Cosmeceuticals",
+      "BioSkin",
+      "Glo2Facial",
+      "Jet Plasma",
+      "ProCell Microchanneling",
+      "Celluma"
+    ]
   }
 }

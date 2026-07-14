@@ -166,6 +166,13 @@
     if (!featSvc.length) featSvc = S;
     set('home-services', featSvc.slice(0, 4).map(svcCard).join(''));
 
+    /* ---- HOME: partner brands ---- */
+    if (document.getElementById('partners-list') && HOME.partners) {
+      set('partners-list', (HOME.partners.items || []).map(function (name, i) {
+        return '<div class="partner-chip" data-cms="home.partners.items.' + i + '">' + name + '</div>';
+      }).join(''));
+    }
+
     /* ---- HOME: featured review (big quote) ---- */
     var fr = R.filter(function (r) { return r.featured; })[0] || R[0];
     if (fr) {

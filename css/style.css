@@ -494,3 +494,8 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{ outline:2px solid
   .foot-grid{ grid-template-columns:1fr; }
   .hero-badge{ left:0; }
 }
+
+/* Partner brands strip */
+.partner-list{ display:flex; flex-wrap:wrap; gap:12px 14px; justify-content:center; max-width:840px; margin:0 auto; }
+.partner-chip{ background:#fff; border:1px solid var(--line); border-radius:100px; padding:12px 26px; font-family:var(--font-head); font-size:15.5px; color:var(--ink); box-shadow:var(--shadow-sm); transition:transform .15s, box-shadow .15s; }
+.partner-chip:hover{ transform:translateY(-2px); box-shadow:var(--shadow); }
