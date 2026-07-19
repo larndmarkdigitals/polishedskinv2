@@ -72,12 +72,22 @@
   }
   // Image slots — click to upload a new photo (resized in-browser, committed to
   // img/ on publish). data-cms-img=path, or the home/about image bindings.
-  var IMG_SEL = '[data-cms-img],[data-h-img],[data-a-img]';
+  // Image slots: an <img> box (data-*-img) OR a CSS-background box (data-*-bg,
+  // e.g. the before/after slider panes). Both are editable the same way.
+  var IMG_SEL = '[data-cms-img],[data-h-img],[data-a-img],[data-cms-bg],[data-h-bg],[data-a-bg]';
   function imgInfo(e) {
     if (e.hasAttribute('data-cms-img')) return e.getAttribute('data-cms-img');
     if (e.hasAttribute('data-h-img'))   return 'home.'  + e.getAttribute('data-h-img');
     if (e.hasAttribute('data-a-img'))   return 'about.' + e.getAttribute('data-a-img');
+    if (e.hasAttribute('data-cms-bg'))  return e.getAttribute('data-cms-bg');
+    if (e.hasAttribute('data-h-bg'))    return 'home.'  + e.getAttribute('data-h-bg');
+    if (e.hasAttribute('data-a-bg'))    return 'about.' + e.getAttribute('data-a-bg');
     return null;
+  }
+  // A slot that shows its photo as a CSS background rather than an <img>.
+  function isBgSlot(e) {
+    return e.hasAttribute('data-cms-bg') || e.hasAttribute('data-h-bg') || e.hasAttribute('data-a-bg')
+      || /background-image/.test(e.getAttribute('style') || '');
   }
   function imgSlots() {
     return Array.prototype.slice.call(document.querySelectorAll(IMG_SEL))
@@ -100,12 +110,17 @@
     reader.readAsDataURL(file);
   }
   function setImgPreview(elm, url) {
-    var inner = elm.querySelector('img');
-    if (inner) inner.src = url;
-    else elm.insertAdjacentHTML('afterbegin', '<img loading="lazy" decoding="async" src="' + url + '" alt="">');
+    if (isBgSlot(elm)) {
+      elm.style.backgroundImage = 'url("' + url + '")';
+      elm.style.backgroundSize = 'cover';
+      elm.style.backgroundPosition = 'center';
+    } else {
+      var inner = elm.querySelector('img');
+      if (inner) inner.src = url;
+      else elm.insertAdjacentHTML('afterbegin', '<img loading="lazy" decoding="async" src="' + url + '" alt="">');
+    }
     elm.classList.remove('img-ph');
     elm.classList.add('oe-has-photo');   // CSS hides the sparkle placeholder / label so only the photo shows
-    if (/background-image/.test(elm.getAttribute('style') || '')) elm.style.backgroundImage = 'url("' + url + '")';
   }
   function newImgName() { return 'img/oe-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7) + '.jpg'; }
   // Stage a resized dataURL for a field: write path + base64 into the draft,

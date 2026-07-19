@@ -36,29 +36,29 @@
 
   window.PSEinitReveal();
 
-  // Before / after comparison sliders
+  // Before / after comparison sliders (vertical: drag up/down)
   function initBA(el) {
     var dragging = false;
-    function setFromX(clientX) {
+    function setFromY(clientY) {
       var r = el.getBoundingClientRect();
-      var p = ((clientX - r.left) / r.width) * 100;
+      var p = ((clientY - r.top) / r.height) * 100;
       p = Math.max(0, Math.min(100, p));
       el.style.setProperty('--pos', p + '%');
     }
     el.addEventListener('pointerdown', function (e) {
       dragging = true;
       try { el.setPointerCapture(e.pointerId); } catch (err) {}
-      setFromX(e.clientX);
+      setFromY(e.clientY);
     });
-    el.addEventListener('pointermove', function (e) { if (dragging) setFromX(e.clientX); });
+    el.addEventListener('pointermove', function (e) { if (dragging) setFromY(e.clientY); });
     el.addEventListener('pointerup', function () { dragging = false; });
     el.addEventListener('pointercancel', function () { dragging = false; });
     var circle = el.querySelector('.ba-circle');
     if (circle) {
       circle.addEventListener('keydown', function (e) {
         var cur = parseFloat(getComputedStyle(el).getPropertyValue('--pos')) || 50;
-        if (e.key === 'ArrowLeft') { el.style.setProperty('--pos', Math.max(0, cur - 4) + '%'); e.preventDefault(); }
-        if (e.key === 'ArrowRight') { el.style.setProperty('--pos', Math.min(100, cur + 4) + '%'); e.preventDefault(); }
+        if (e.key === 'ArrowUp') { el.style.setProperty('--pos', Math.max(0, cur - 4) + '%'); e.preventDefault(); }
+        if (e.key === 'ArrowDown') { el.style.setProperty('--pos', Math.min(100, cur + 4) + '%'); e.preventDefault(); }
       });
     }
   }
