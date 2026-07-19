@@ -36,9 +36,12 @@
 
   window.PSEinitReveal();
 
-  // Before / after comparison sliders (vertical: drag up/down)
+  // Before / after comparison sliders (vertical: drag up/down).
+  // Disabled while the on-page editor is active (body.oe-on) so clicking a pane
+  // swaps its photo instead of dragging; CSS locks the divider to the center.
   function initBA(el) {
     var dragging = false;
+    function locked() { return document.body.classList.contains('oe-on'); }
     function setFromY(clientY) {
       var r = el.getBoundingClientRect();
       var p = ((clientY - r.top) / r.height) * 100;
@@ -46,16 +49,18 @@
       el.style.setProperty('--pos', p + '%');
     }
     el.addEventListener('pointerdown', function (e) {
+      if (locked()) return;
       dragging = true;
       try { el.setPointerCapture(e.pointerId); } catch (err) {}
       setFromY(e.clientY);
     });
-    el.addEventListener('pointermove', function (e) { if (dragging) setFromY(e.clientY); });
+    el.addEventListener('pointermove', function (e) { if (dragging && !locked()) setFromY(e.clientY); });
     el.addEventListener('pointerup', function () { dragging = false; });
     el.addEventListener('pointercancel', function () { dragging = false; });
     var circle = el.querySelector('.ba-circle');
     if (circle) {
       circle.addEventListener('keydown', function (e) {
+        if (locked()) return;
         var cur = parseFloat(getComputedStyle(el).getPropertyValue('--pos')) || 50;
         if (e.key === 'ArrowUp') { el.style.setProperty('--pos', Math.max(0, cur - 4) + '%'); e.preventDefault(); }
         if (e.key === 'ArrowDown') { el.style.setProperty('--pos', Math.min(100, cur + 4) + '%'); e.preventDefault(); }

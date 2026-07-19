@@ -119,8 +119,10 @@ window.CMS_MEDIA = {
   dropboxAppKey: '',
   // aspect = frame width/height, used by the crop tool (matches the CSS frames).
   fields: [
-    { key: 'home.hero.img',      label: 'Homepage — hero photo', aspect: 4 / 5 },
-    { key: 'home.about.img',     label: 'Homepage — clinic photo', aspect: 4 / 5 },
+    { key: 'home.hero.img',        label: 'Homepage — hero photo', aspect: 4 / 5 },
+    { key: 'home.about.img',       label: 'Homepage — clinic photo', aspect: 4 / 5 },
+    { key: 'home.results.beforeImg', label: 'Homepage — before/after: Before', aspect: 4 / 5 },
+    { key: 'home.results.afterImg',  label: 'Homepage — before/after: After', aspect: 4 / 5 },
     { key: 'about.clinicPhoto',  label: 'About page — clinic photo', aspect: 4 / 5 },
     { collection: 'services.services',     imgKey: 'img', label: 'Service: {name}', aspect: 3 / 2 },
     { collection: 'treatments.treatments', imgKey: 'img', label: 'Treatment: {name}', aspect: 2 / 1 },

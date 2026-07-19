@@ -346,6 +346,10 @@ section{ padding:96px 0; }
 }
 .ba-circle svg{ transform:rotate(90deg); }
 .ba-circle:focus-visible{ outline:3px solid var(--teal); outline-offset:2px; }
+/* In edit mode: lock the divider to the center and stop it grabbing clicks,
+   so each pane is a clean click-to-swap photo target. */
+body.oe-on .ba-slider{ --pos:50%!important; cursor:default; }
+body.oe-on .ba-circle{ pointer-events:none; }
 .results-btns{ display:flex; gap:14px; flex-wrap:wrap; margin-top:28px; }
 
 /* ---------- Nav dropdown ---------- */
