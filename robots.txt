@@ -1,7 +1,4 @@
-# PREVIEW / EDITING BUILD — keep this hidden from search engines.
-# For the real public launch, change this back to:
-#   User-agent: *
-#   Allow: /
-#   Sitemap: https://polishedskineugene.com/sitemap.xml
 User-agent: *
-Disallow: /
+Allow: /
+
+Sitemap: https://polishedskineugene.com/sitemap.xml
