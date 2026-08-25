@@ -22,6 +22,29 @@
   // Markdown -> HTML (from js/md.js); falls back to raw text if not loaded.
   function md(s) { return window.PSE_md ? window.PSE_md(s) : (s || ''); }
 
+  // Point the canonical URL + meta/og description at the specific record on the
+  // client-rendered detail pages (treatment.html / post.html), so each ?slug=
+  // indexes as its own page instead of sharing the base page's tags.
+  var SITE_ORIGIN = 'https://polishedskineugene.com';
+  function setMeta(desc, canonicalPath) {
+    if (canonicalPath) {
+      var abs = SITE_ORIGIN + canonicalPath;
+      var can = document.querySelector('link[rel="canonical"]');
+      if (can) can.setAttribute('href', abs);
+      var ogu = document.querySelector('meta[property="og:url"]');
+      if (ogu) ogu.setAttribute('content', abs);
+    }
+    if (desc) {
+      desc = String(desc).replace(/\s+/g, ' ').trim().slice(0, 160);
+      var md_ = document.querySelector('meta[name="description"]');
+      if (md_) md_.setAttribute('content', desc);
+      var ogd = document.querySelector('meta[property="og:description"]');
+      if (ogd) ogd.setAttribute('content', desc);
+      var ogt = document.querySelector('meta[property="og:title"]');
+      if (ogt) ogt.setAttribute('content', document.title);
+    }
+  }
+
   function svcImg(s, cls) {
     var ip = ' data-cms-img="services.services.' + S.indexOf(s) + '.img"';
     return s && s.img
@@ -238,6 +261,7 @@
       if (post) {
         var pb = 'posts.posts.' + P.indexOf(post) + '.';
         document.title = post.title + ' — Polished Skin Eugene';
+        setMeta(post.excerpt, '/post.html?slug=' + post.slug);
         set('post-tag', post.tag); var _pt = document.getElementById('post-tag'); if (_pt) _pt.setAttribute('data-cms', pb + 'tag');
         set('post-title', post.title); var _ph = document.getElementById('post-title'); if (_ph) _ph.setAttribute('data-cms', pb + 'title');
         set('post-meta', (post.date ? post.date + ' · ' : '') + (post.readTime || ''));
@@ -298,6 +322,7 @@
       if (t) {
         var tb = 'treatments.treatments.' + T.indexOf(t) + '.';
         document.title = t.name + ' — Polished Skin Eugene';
+        setMeta(t.lead || t.tagline, '/treatment.html?slug=' + t.slug);
         set('t-crumb', t.name);
         set('t-name', t.name); stampCms('t-name', tb + 'name');
         set('t-tagline', t.tagline); stampCms('t-tagline', tb + 'tagline');

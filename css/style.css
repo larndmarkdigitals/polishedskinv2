@@ -89,7 +89,13 @@ section{ padding:96px 0; }
 /* ---------- Navbar ---------- */
 .nav{
   position:sticky; top:0; z-index:60; background:rgba(255,255,255,.86);
-  backdrop-filter:blur(12px); border-bottom:1px solid transparent; transition:.25s;
+  -webkit-backdrop-filter:blur(12px); backdrop-filter:blur(12px);
+  border-bottom:1px solid transparent; transition:.25s;
+}
+/* iOS Safari: if the blur isn't supported, fall back to an opaque bar so
+   page content never bleeds through the semi-transparent nav. */
+@supports not ((-webkit-backdrop-filter:blur(1px)) or (backdrop-filter:blur(1px))){
+  .nav{ background:rgba(255,255,255,.98); }
 }
 .nav.scrolled{ border-color:var(--line); box-shadow:var(--shadow-sm); }
 .nav-inner{ display:flex; align-items:center; justify-content:space-between; height:78px; }
@@ -497,7 +503,21 @@ a:focus-visible,button:focus-visible,[tabindex]:focus-visible{ outline:2px solid
   .menu-row{ flex-direction:column; }
   .menu-row .mr-price{ margin-top:8px; }
   .foot-grid{ grid-template-columns:1fr; }
+  /* Center the hero image + tuck the ratings badge back inside it */
+  .hero-visual{ margin:0 auto; }
   .hero-badge{ left:0; }
+  /* Full-width CTAs — bigger tap targets, no awkward half-row wrapping */
+  .hero-btns .btn,.results-btns .btn,.cta-inner .btn{ width:100%; }
+  .hero-btns,.results-btns{ gap:12px; }
+}
+/* Small phones (iPhone SE / mini): reclaim edge space, ease the big type down */
+@media (max-width:400px){
+  .container{ padding:0 18px; }
+  .hero{ padding:60px 0 68px; }
+  .hero h1{ font-size:35px; }
+  .hero p.lede{ font-size:17px; }
+  .s-title{ font-size:26px; }
+  .page-hero{ padding:56px 0 48px; }
 }
 
 /* Partner brands strip */
