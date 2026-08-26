@@ -6,13 +6,37 @@
     "phone": "(541) 515-8845",
     "phoneDigits": "5415158845",
     "hours": [
-      { "day": "Sunday", "time": "Closed", "closed": true },
-      { "day": "Monday", "time": "Closed", "closed": true },
-      { "day": "Tuesday", "time": "9:00 AM – 7:00 PM" },
-      { "day": "Wednesday", "time": "10:00 AM – 5:00 PM" },
-      { "day": "Thursday", "time": "10:00 AM – 7:00 PM" },
-      { "day": "Friday", "time": "10:00 AM – 5:00 PM" },
-      { "day": "Saturday", "time": "10:00 AM – 5:00 PM" }
+      {
+        "day": "Sunday",
+        "time": "Closed",
+        "closed": true
+      },
+      {
+        "day": "Monday",
+        "time": "Closed",
+        "closed": true
+      },
+      {
+        "day": "Tuesday",
+        "time": "9:00 AM – 7:00 PM"
+      },
+      {
+        "day": "Wednesday",
+        "time": "Closed",
+        "closed": true
+      },
+      {
+        "day": "Thursday",
+        "time": "10:00 AM – 7:00 PM"
+      },
+      {
+        "day": "Friday",
+        "time": "10:00 AM – 5:00 PM"
+      },
+      {
+        "day": "Saturday",
+        "time": "10:00 AM – 3:00 PM"
+      }
     ],
     "hoursNote": "Tue–Sat · By appointment",
     "closedNote": "Closed Sun & Mon"
